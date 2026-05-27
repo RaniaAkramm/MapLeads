@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MapLeads | استخراج بيانات الشركات</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+    <header class="bg-white shadow p-4 flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-blue-700">MapLeads</h1>
+    </header>
+
+    <main class="container mx-auto p-4 space-y-8">
+        <!-- الخارطة -->
+        <section class="bg-white p-4 rounded-xl shadow-lg">
+            <div id="map" class="w-full h-80 rounded-lg mb-4"></div>
+            <div class="flex gap-2">
+                <input type="text" id="searchInput" placeholder="اكتب نوع النشاط (مثال: صيدليات)..." class="flex-1 p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                <button onclick="searchLeads()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">بحث في الخريطة</button>
+            </div>
+        </section>
+
+        <!-- النتائج -->
+        <section id="resultsSection" class="bg-white p-6 rounded-xl shadow-lg">
+            <h2 class="text-xl font-bold mb-4">نتائج البحث</h2>
+            <div id="resultsTable" class="overflow-x-auto">
+                <table class="w-full text-right border-collapse">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="p-3">الشركة</th>
+                            <th class="p-3">رقم الهاتف</th>
+                            <th class="p-3">الموقع</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- قسم الدومينات -->
+        <section>
+            <h3 class="text-2xl font-bold text-center mb-6">دومينات مميزة للبيع</h3>
+            <div id="domainsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+        </section>
+    </main>
+
+    <script>
+        const map = L.map('map').setView([24.7136, 46.6753], 6);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        // رابط الـ Proxy الخاص بك على Vercel
+        const API_PROXY = "/api/search"; 
+
+        async function searchLeads() {
+            const query = document.getElementById('searchInput').value;
+            const body = document.getElementById('resultsBody');
+            body.innerHTML = "<tr><td colspan='3' class='p-4 text-center'>جاري الاتصال بـ SerpApi...</td></tr>";
+
+            try {
+                // الربط بـ API الخاص بك
+                const response = await fetch(API_PROXY, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ q: query })
+                });
+                const data = await response.json();
+                
+                // عرض النتائج
+                body.innerHTML = data.map(item => `
+                    <tr class="border-b">
+                        <td class="p-3">${item.title}</td>
+                        <td class="p-3">${item.phone || 'غير متوفر'}</td>
+                        <td class="p-3">${item.website || '---'}</td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                body.innerHTML = "<tr><td colspan='3' class='p-4 text-red-500 text-center'>حدث خطأ أثناء الاتصال، يرجى التأكد من إعدادات الـ API.</td></tr>";
+            }
+        }
+
+        const domains = ["EdgeList.ai", "SteelLevel.com", "Duoauction.com", "BeamMCP.com", "SumMCP.com", "JYA.io"];
+        const grid = document.getElementById('domainsGrid');
+        grid.innerHTML = domains.map(d => `
+            <div class="p-4 border rounded-lg shadow-sm text-center hover:shadow-md transition">
+                <p class="font-bold mb-2">${d}</p>
+                <a href="https://godaddy.com" class="text-xs bg-gray-800 text-white px-3 py-1 rounded">شراء ($2)</a>
+            </div>
+        `).join('');
+    </script>
+</body>
+</html>
