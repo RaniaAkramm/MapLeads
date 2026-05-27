@@ -478,7 +478,11 @@ ${b.name || 'Business'}
 </div>
 
 <div class="field">
-📞 <a href="tel:${b.phone || ''}">
+📞 <a 
+href="https://wa.me/${(b.phone || '').replace(/[^0-9]/g,'')}" 
+target="_blank"
+style="color:#25D366;font-weight:700;text-decoration:none;"
+>
 ${b.phone || ''}
 </a>
 </div>
