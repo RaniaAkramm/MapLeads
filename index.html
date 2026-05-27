@@ -1,868 +1,594 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MapLeads – Find Business Leads From Any Map Location</title>
-<meta name="description" content="MapLeads: Extract business leads from any location on the map. Get names, phones, emails, and social media instantly. The #1 lead generation map tool.">
-<meta name="keywords" content="map leads, business leads, local business finder, lead generation, extract business data, map scraper, find business contacts, phone number finder, email finder, local SEO leads, Google Maps leads, business directory">
-<meta property="og:title" content="MapLeads – Find Business Leads From Any Map Location">
-<meta property="og:description" content="Search any location on the map and extract business leads: name, phone, email, social media and more.">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>MapLeads — Business Leads Finder</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
 
 <style>
-  :root {
-    --bg: #0a0a0f;
-    --surface: #111118;
-    --surface2: #1a1a24;
-    --accent: #00e5ff;
-    --accent2: #7c3aed;
-    --accent3: #f59e0b;
-    --text: #e8e8f0;
-    --muted: #6b7280;
-    --border: rgba(0,229,255,0.15);
-    --glow: 0 0 30px rgba(0,229,255,0.2);
-  }
-  [data-lang="ar"] { direction: rtl; font-family: 'Syne', 'Cairo', sans-serif; }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  html { scroll-behavior: smooth; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Syne', sans-serif;
-    overflow-x: hidden;
-  }
+:root{
+--bg:#070b14;
+--card:#111827;
+--card2:#1f2937;
+--accent:#00e5ff;
+--text:#f3f4f6;
+--muted:#9ca3af;
+--border:#233044;
+}
 
-  /* ── NOISE OVERLAY ── */
-  body::before {
-    content:'';
-    position:fixed; inset:0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-    pointer-events:none; z-index:0; opacity:.4;
-  }
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
 
-  /* ── NAV ── */
-  nav {
-    position: fixed; top:0; left:0; right:0; z-index:1000;
-    display:flex; align-items:center; justify-content:space-between;
-    padding: 16px 40px;
-    background: rgba(10,10,15,0.85);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border);
-  }
-  .logo {
-    display:flex; align-items:center; gap:10px;
-    font-family:'Space Mono', monospace; font-size:1.4rem; font-weight:700;
-    color:var(--accent); letter-spacing:-1px;
-    text-decoration:none;
-  }
-  .logo-icon {
-    width:36px; height:36px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-radius:8px;
-    display:flex; align-items:center; justify-content:center;
-    font-size:18px;
-  }
-  .nav-right { display:flex; align-items:center; gap:16px; }
-  .lang-btn {
-    background: var(--surface2); border: 1px solid var(--border);
-    color: var(--text); padding:8px 16px; border-radius:8px;
-    cursor:pointer; font-family:'Space Mono',monospace; font-size:.8rem;
-    transition:.2s; letter-spacing:1px;
-  }
-  .lang-btn:hover { border-color: var(--accent); color:var(--accent); }
+body{
+font-family:'Syne',sans-serif;
+background:linear-gradient(180deg,#070b14,#0f172a);
+color:var(--text);
+overflow-x:hidden;
+}
 
-  /* ── HERO ── */
-  .hero {
-    padding: 120px 40px 60px;
-    text-align:center;
-    position:relative; z-index:1;
-  }
-  .hero-badge {
-    display:inline-block;
-    background: rgba(0,229,255,0.1); border:1px solid var(--border);
-    color:var(--accent); padding:6px 18px; border-radius:100px;
-    font-family:'Space Mono',monospace; font-size:.75rem; letter-spacing:2px;
-    margin-bottom:28px; text-transform:uppercase;
-  }
-  .hero h1 {
-    font-size: clamp(2.8rem, 7vw, 5.5rem);
-    font-weight:800; line-height:1.05;
-    background: linear-gradient(135deg, #fff 30%, var(--accent) 60%, var(--accent2) 90%);
-    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-    margin-bottom:24px;
-  }
-  .hero p {
-    font-size:1.15rem; color:var(--muted); max-width:600px; margin:0 auto 48px;
-    line-height:1.7;
-  }
-  .hero-stats {
-    display:flex; gap:40px; justify-content:center; flex-wrap:wrap;
-    margin-bottom:64px;
-  }
-  .stat { text-align:center; }
-  .stat-num {
-    font-family:'Space Mono',monospace; font-size:2rem; font-weight:700;
-    color:var(--accent); display:block;
-  }
-  .stat-label { font-size:.8rem; color:var(--muted); letter-spacing:1px; text-transform:uppercase; }
+nav{
+padding:20px 30px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+border-bottom:1px solid var(--border);
+background:rgba(0,0,0,.4);
+backdrop-filter:blur(12px);
+position:sticky;
+top:0;
+z-index:100;
+}
 
-  /* ── GRID BACKGROUND ── */
-  .hero::after {
-    content:'';
-    position:absolute; inset:0; z-index:-1;
-    background-image:
-      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
-    background-size:60px 60px;
-    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%);
-  }
+.logo{
+font-size:1.4rem;
+font-weight:800;
+color:var(--accent);
+}
 
-  /* ── MAP SECTION ── */
-  .map-section {
-    padding: 0 40px 80px;
-    position:relative; z-index:1;
-    max-width:1400px; margin:0 auto;
-  }
-  .map-wrapper {
-    border-radius:20px; overflow:hidden;
-    border: 1px solid var(--border);
-    box-shadow: var(--glow), 0 40px 80px rgba(0,0,0,0.6);
-    position:relative;
-  }
-  .map-search-bar {
-    position:absolute; top:20px; left:50%; transform:translateX(-50%);
-    z-index:1000; width:min(90%, 600px);
-    display:flex; gap:0;
-  }
-  .map-search-input {
-    flex:1; padding:14px 20px;
-    background:rgba(10,10,15,0.92); backdrop-filter:blur(20px);
-    border:1px solid var(--border); border-right:none;
-    border-radius:12px 0 0 12px;
-    color:var(--text); font-family:'Syne',sans-serif; font-size:.95rem;
-    outline:none; transition:.2s;
-  }
-  .map-search-input:focus { border-color:var(--accent); }
-  .map-search-btn {
-    padding:14px 24px;
-    background:var(--accent); color:var(--bg);
-    border:none; border-radius:0 12px 12px 0;
-    font-family:'Space Mono',monospace; font-weight:700; font-size:.85rem;
-    cursor:pointer; transition:.2s; letter-spacing:1px;
-  }
-  .map-search-btn:hover { background:#00b8cc; }
-  #map { height:520px; width:100%; }
-  .map-hint {
-    position:absolute; bottom:16px; left:50%; transform:translateX(-50%);
-    background:rgba(10,10,15,0.85); backdrop-filter:blur(10px);
-    border:1px solid var(--border); color:var(--muted);
-    padding:8px 20px; border-radius:100px; font-size:.8rem;
-    font-family:'Space Mono',monospace; white-space:nowrap; z-index:1000;
-    pointer-events:none;
-  }
+.lang-btn{
+background:var(--card2);
+border:1px solid var(--border);
+color:white;
+padding:10px 16px;
+border-radius:10px;
+cursor:pointer;
+}
 
-  /* ── TOOL SECTION ── */
-  .tool-section {
-    max-width:900px; margin:0 auto 80px;
-    padding:0 40px;
-    position:relative; z-index:1;
-  }
-  .tool-header {
-    text-align:center; margin-bottom:48px;
-  }
-  .tool-header h2 {
-    font-size:2.2rem; font-weight:800;
-    background:linear-gradient(90deg, #fff, var(--accent));
-    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-    margin-bottom:12px;
-  }
-  .tool-header p { color:var(--muted); font-size:1rem; }
+.hero{
+padding:80px 20px 50px;
+text-align:center;
+}
 
-  .search-box {
-    background: var(--surface);
-    border:1px solid var(--border);
-    border-radius:20px; padding:32px;
-    box-shadow: var(--glow);
-    margin-bottom:32px;
-  }
-  .search-row {
-    display:flex; gap:12px; margin-bottom:16px;
-  }
-  .search-input {
-    flex:1; padding:16px 22px;
-    background:var(--surface2); border:1px solid var(--border);
-    border-radius:12px; color:var(--text);
-    font-family:'Syne',sans-serif; font-size:1rem;
-    outline:none; transition:.2s;
-  }
-  .search-input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(0,229,255,0.1); }
-  .search-submit {
-    padding:16px 32px;
-    background:linear-gradient(135deg, var(--accent), var(--accent2));
-    border:none; border-radius:12px;
-    color:#fff; font-family:'Space Mono',monospace; font-weight:700;
-    font-size:.9rem; cursor:pointer; transition:.2s;
-    white-space:nowrap; letter-spacing:1px;
-  }
-  .search-submit:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(0,229,255,0.3); }
-  .search-submit:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+.hero h1{
+font-size:clamp(2.5rem,7vw,5rem);
+line-height:1.1;
+margin-bottom:20px;
+background:linear-gradient(90deg,#fff,#00e5ff);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+}
 
-  .suggestions {
-    display:flex; flex-wrap:wrap; gap:8px;
-  }
-  .suggestion-tag {
-    background:var(--surface2); border:1px solid var(--border);
-    color:var(--muted); padding:6px 14px; border-radius:100px;
-    font-size:.8rem; cursor:pointer; transition:.2s;
-    font-family:'Space Mono',monospace;
-  }
-  .suggestion-tag:hover { border-color:var(--accent); color:var(--accent); }
+.hero p{
+max-width:700px;
+margin:auto;
+color:var(--muted);
+font-size:1.05rem;
+line-height:1.8;
+}
 
-  .spell-hint {
-    background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3);
-    border-radius:10px; padding:12px 18px; margin-top:12px;
-    font-size:.85rem; color:var(--accent3); display:none;
-  }
-  .spell-hint span { cursor:pointer; text-decoration:underline; font-weight:700; }
+.search-box{
+max-width:1000px;
+margin:50px auto;
+padding:25px;
+background:rgba(17,24,39,.8);
+border:1px solid var(--border);
+border-radius:22px;
+backdrop-filter:blur(12px);
+}
 
-  /* ── RESULTS ── */
-  .results-section {
-    background: var(--surface);
-    border:1px solid var(--border);
-    border-radius:20px; padding:32px;
-    display:none;
-  }
-  .results-header {
-    display:flex; align-items:center; justify-content:space-between;
-    margin-bottom:24px; flex-wrap:wrap; gap:16px;
-  }
-  .results-count {
-    font-family:'Space Mono',monospace; font-size:.85rem; color:var(--muted);
-  }
-  .results-count strong { color:var(--accent); }
-  .export-btns { display:flex; gap:10px; }
-  .export-btn {
-    display:flex; align-items:center; gap:8px;
-    padding:10px 18px; border-radius:10px;
-    font-family:'Space Mono',monospace; font-size:.78rem;
-    cursor:pointer; transition:.2s; font-weight:700; letter-spacing:.5px;
-    border:1px solid;
-  }
-  .export-csv {
-    background:rgba(0,229,255,0.1); border-color:rgba(0,229,255,0.4); color:var(--accent);
-  }
-  .export-csv:hover { background:rgba(0,229,255,0.2); }
-  .export-json {
-    background:rgba(124,58,237,0.1); border-color:rgba(124,58,237,0.4); color:#a78bfa;
-  }
-  .export-json:hover { background:rgba(124,58,237,0.2); }
+.search-row{
+display:flex;
+gap:12px;
+flex-wrap:wrap;
+}
 
-  .result-card {
-    background:var(--surface2);
-    border:1px solid var(--border);
-    border-radius:14px; padding:22px;
-    margin-bottom:14px; transition:.2s;
-  }
-  .result-card:hover { border-color:rgba(0,229,255,0.4); transform:translateY(-1px); }
-  .result-name {
-    font-size:1.1rem; font-weight:700; margin-bottom:14px;
-    color:#fff;
-  }
-  .result-grid {
-    display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:10px;
-  }
-  .result-field {
-    display:flex; align-items:flex-start; gap:8px; font-size:.85rem;
-  }
-  .field-icon { font-size:1rem; flex-shrink:0; margin-top:1px; }
-  .field-label { color:var(--muted); font-size:.75rem; font-family:'Space Mono',monospace; display:block; }
-  .field-value { color:var(--text); word-break:break-all; }
-  .field-value a { color:var(--accent); text-decoration:none; }
-  .field-value a:hover { text-decoration:underline; }
-  .social-icons { display:flex; gap:8px; flex-wrap:wrap; }
-  .social-link {
-    display:inline-flex; align-items:center; gap:5px;
-    background:var(--surface); border:1px solid var(--border);
-    padding:4px 10px; border-radius:6px;
-    font-size:.75rem; color:var(--muted); text-decoration:none;
-    transition:.2s;
-  }
-  .social-link:hover { border-color:var(--accent); color:var(--accent); }
+.search-input{
+flex:1;
+padding:18px;
+border:none;
+border-radius:14px;
+background:var(--card2);
+color:white;
+font-size:1rem;
+outline:none;
+}
 
-  /* ── LOADING ── */
-  .loading {
-    text-align:center; padding:48px;
-    display:none;
-  }
-  .spinner {
-    width:48px; height:48px;
-    border:3px solid var(--border);
-    border-top-color:var(--accent);
-    border-radius:50%;
-    animation:spin .8s linear infinite;
-    margin:0 auto 16px;
-  }
-  @keyframes spin { to { transform:rotate(360deg); } }
-  .loading p { color:var(--muted); font-family:'Space Mono',monospace; font-size:.85rem; }
+.search-btn{
+padding:18px 28px;
+border:none;
+border-radius:14px;
+background:linear-gradient(135deg,#00e5ff,#2563eb);
+color:white;
+font-weight:700;
+cursor:pointer;
+transition:.2s;
+}
 
-  /* ── AD BANNER ── */
-  .ad-banner {
-    max-width:900px; margin:0 auto 80px; padding:0 40px;
-    position:relative; z-index:1;
-  }
-  .ad-card {
-    background:linear-gradient(135deg, rgba(124,58,237,0.2), rgba(0,229,255,0.1));
-    border:1px solid rgba(124,58,237,0.4);
-    border-radius:16px; padding:24px 32px;
-    display:flex; align-items:center; justify-content:space-between;
-    flex-wrap:wrap; gap:16px;
-  }
-  .ad-left h3 {
-    font-size:1.1rem; font-weight:700; color:#fff; margin-bottom:4px;
-  }
-  .ad-left p { color:var(--muted); font-size:.85rem; }
-  .ad-price {
-    font-family:'Space Mono',monospace; font-size:1.8rem; font-weight:700;
-    color:var(--accent3); display:flex; align-items:baseline; gap:4px;
-  }
-  .ad-price small { font-size:.9rem; color:var(--muted); }
-  .ad-cta {
-    background:var(--accent3); color:var(--bg);
-    border:none; padding:12px 24px; border-radius:10px;
-    font-family:'Space Mono',monospace; font-weight:700; font-size:.85rem;
-    cursor:pointer; transition:.2s;
-  }
-  .ad-cta:hover { background:#d97706; }
+.search-btn:hover{
+transform:translateY(-2px);
+}
 
-  /* ── DOMAINS SECTION ── */
-  .domains-section {
-    max-width:1200px; margin:0 auto 100px; padding:0 40px;
-    position:relative; z-index:1;
-  }
-  .domains-header {
-    text-align:center; margin-bottom:48px;
-  }
-  .domains-header h2 {
-    font-size:2.2rem; font-weight:800; color:#fff; margin-bottom:12px;
-  }
-  .domains-header p { color:var(--muted); }
-  .domains-grid {
-    display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));
-    gap:16px;
-  }
-  .domain-card {
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:14px; padding:20px;
-    display:flex; align-items:center; justify-content:space-between;
-    transition:.3s; cursor:pointer;
-    text-decoration:none;
-  }
-  .domain-card:hover {
-    border-color:var(--accent);
-    box-shadow:0 0 20px rgba(0,229,255,0.15);
-    transform:translateY(-2px);
-  }
-  .domain-left { display:flex; align-items:center; gap:12px; }
-  .domain-logo {
-    width:40px; height:40px;
-    background:linear-gradient(135deg, var(--accent2), var(--accent));
-    border-radius:10px; display:flex; align-items:center; justify-content:center;
-    font-weight:800; font-size:.85rem; color:#fff; flex-shrink:0;
-    font-family:'Space Mono',monospace;
-  }
-  .domain-name {
-    font-weight:700; color:#fff; font-size:.95rem; margin-bottom:2px;
-  }
-  .domain-ext {
-    font-size:.75rem; color:var(--muted); font-family:'Space Mono',monospace;
-  }
-  .domain-buy {
-    display:flex; align-items:center; gap:6px;
-    background:rgba(0,229,255,0.1); border:1px solid rgba(0,229,255,0.3);
-    color:var(--accent); padding:8px 14px; border-radius:8px;
-    font-family:'Space Mono',monospace; font-size:.75rem; font-weight:700;
-    transition:.2s; text-decoration:none; white-space:nowrap;
-  }
-  .domain-card:hover .domain-buy { background:rgba(0,229,255,0.2); }
+.tags{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-top:18px;
+}
 
-  /* ── FOOTER ── */
-  footer {
-    border-top:1px solid var(--border);
-    padding:40px; text-align:center;
-    color:var(--muted); font-size:.85rem;
-    position:relative; z-index:1;
-  }
-  footer a { color:var(--accent); text-decoration:none; }
+.tag{
+padding:8px 14px;
+border-radius:999px;
+background:var(--card2);
+border:1px solid var(--border);
+cursor:pointer;
+font-size:.85rem;
+color:var(--muted);
+transition:.2s;
+}
 
-  /* ── LEAFLET OVERRIDES ── */
-  .leaflet-control-zoom a {
-    background:rgba(10,10,15,0.9) !important;
-    color:var(--text) !important;
-    border-color:var(--border) !important;
-  }
-  .leaflet-popup-content-wrapper {
-    background:var(--surface) !important;
-    border:1px solid var(--border) !important;
-    color:var(--text) !important;
-    border-radius:12px !important;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.5) !important;
-  }
-  .leaflet-popup-tip { background:var(--surface) !important; }
+.tag:hover{
+border-color:var(--accent);
+color:var(--accent);
+}
 
-  /* ── ARABIC OVERRIDES ── */
-  [data-lang="ar"] .map-search-input { border-radius:0 12px 12px 0; border-right:1px solid var(--border); border-left:none; }
-  [data-lang="ar"] .map-search-btn { border-radius:12px 0 0 12px; }
-  [data-lang="ar"] .search-submit { border-radius:12px 0 0 12px; }
-  [data-lang="ar"] .search-input { border-radius:0 12px 12px 0; }
+.loading{
+display:none;
+text-align:center;
+padding:40px;
+}
 
-  @media(max-width:768px) {
-    nav { padding:14px 20px; }
-    .hero { padding:100px 20px 40px; }
-    .map-section, .tool-section, .ad-banner, .domains-section { padding-left:20px; padding-right:20px; }
-    .hero-stats { gap:24px; }
-    .search-row { flex-direction:column; }
-    .results-header { flex-direction:column; }
-    #map { height:380px; }
-    .ad-card { flex-direction:column; text-align:center; }
-  }
+.spinner{
+width:50px;
+height:50px;
+border:4px solid #1e293b;
+border-top:4px solid var(--accent);
+border-radius:50%;
+margin:auto;
+animation:spin 1s linear infinite;
+}
+
+@keyframes spin{
+100%{transform:rotate(360deg);}
+}
+
+.results{
+max-width:1200px;
+margin:40px auto;
+padding:0 20px 100px;
+display:none;
+}
+
+.results-top{
+display:flex;
+justify-content:space-between;
+align-items:center;
+flex-wrap:wrap;
+gap:12px;
+margin-bottom:20px;
+}
+
+.export-buttons{
+display:flex;
+gap:10px;
+}
+
+.export-btn{
+padding:10px 16px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+font-weight:700;
+}
+
+.csv{
+background:#00e5ff;
+color:#000;
+}
+
+.json{
+background:#7c3aed;
+color:white;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+gap:18px;
+}
+
+.card{
+background:rgba(17,24,39,.95);
+border:1px solid var(--border);
+padding:22px;
+border-radius:18px;
+transition:.2s;
+}
+
+.card:hover{
+transform:translateY(-3px);
+border-color:#00e5ff55;
+}
+
+.name{
+font-size:1.2rem;
+font-weight:800;
+margin-bottom:14px;
+}
+
+.field{
+margin-bottom:10px;
+font-size:.92rem;
+line-height:1.6;
+color:#d1d5db;
+word-break:break-word;
+}
+
+.field a{
+color:#00e5ff;
+text-decoration:none;
+}
+
+.footer{
+padding:40px 20px;
+text-align:center;
+border-top:1px solid var(--border);
+color:var(--muted);
+}
+
+.domains{
+max-width:1200px;
+margin:auto;
+padding:0 20px 80px;
+}
+
+.domains h2{
+text-align:center;
+margin-bottom:30px;
+font-size:2rem;
+}
+
+.domain-grid{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+gap:16px;
+}
+
+.domain{
+background:var(--card);
+border:1px solid var(--border);
+padding:18px;
+border-radius:16px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+text-decoration:none;
+transition:.2s;
+}
+
+.domain:hover{
+transform:translateY(-2px);
+border-color:var(--accent);
+}
+
+.domain-name{
+font-weight:700;
+color:white;
+}
+
+.buy{
+background:#00e5ff22;
+padding:8px 14px;
+border-radius:10px;
+color:var(--accent);
+font-weight:700;
+}
+
+@media(max-width:700px){
+.search-row{
+flex-direction:column;
+}
+}
 </style>
 </head>
-<body data-lang="en">
 
-<!-- NAV -->
+<body>
+
 <nav>
-  <a href="#" class="logo">
-    <div class="logo-icon">📍</div>
-    MapLeads
-  </a>
-  <div class="nav-right">
-    <button class="lang-btn" onclick="toggleLang()" id="langBtn">🌐 العربية</button>
-  </div>
+<div class="logo">📍 MapLeads</div>
+<button class="lang-btn" onclick="toggleLang()">🌐 العربية</button>
 </nav>
 
-<!-- HERO -->
 <section class="hero">
-  <div class="hero-badge" data-en="🚀 #1 Map-Based Lead Generation Tool" data-ar="🚀 أداة #1 لاستخراج العملاء من الخريطة">🚀 #1 Map-Based Lead Generation Tool</div>
-  <h1 data-en="Find Business Leads<br>From Any Location" data-ar="اكتشف عملاء محتملين<br>من أي موقع على الخريطة">Find Business Leads<br>From Any Location</h1>
-  <p data-en="Click anywhere on the map or search a keyword. Instantly extract business names, phone numbers, emails, websites & social media accounts." data-ar="انقر على أي مكان في الخريطة أو ابحث بكلمة مفتاحية. استخرج فوراً أسماء الشركات، أرقام الهواتف، الإيميلات، المواقع وحسابات التواصل الاجتماعي.">Click anywhere on the map or search a keyword. Instantly extract business names, phone numbers, emails, websites & social media accounts.</p>
-  <div class="hero-stats">
-    <div class="stat">
-      <span class="stat-num">10M+</span>
-      <span class="stat-label" data-en="Businesses Indexed" data-ar="شركة مفهرسة">Businesses Indexed</span>
-    </div>
-    <div class="stat">
-      <span class="stat-num">190+</span>
-      <span class="stat-label" data-en="Countries Covered" data-ar="دولة مغطاة">Countries Covered</span>
-    </div>
-    <div class="stat">
-      <span class="stat-num">CSV</span>
-      <span class="stat-label" data-en="Instant Export" data-ar="تصدير فوري">Instant Export</span>
-    </div>
-  </div>
-</section>
+<h1 id="heroTitle">
+Find Business Leads<br>Anywhere
+</h1>
 
-<!-- MAP -->
-<section class="map-section">
-  <div class="map-wrapper">
-    <div class="map-search-bar">
-      <input class="map-search-input" id="mapSearch" type="text"
-        placeholder="Search a city or place on map..."
-        data-placeholder-en="Search a city or place on map..."
-        data-placeholder-ar="ابحث عن مدينة أو مكان على الخريطة...">
-      <button class="map-search-btn" onclick="searchOnMap()" data-en="GO" data-ar="بحث">GO</button>
-    </div>
-    <div id="map"></div>
-    <div class="map-hint" id="mapHint" data-en="📍 Click anywhere on the map to set your search area" data-ar="📍 انقر على أي مكان في الخريطة لتحديد منطقة البحث">📍 Click anywhere on the map to set your search area</div>
-  </div>
-</section>
+<p id="heroText">
+Search restaurants, hotels, lawyers, dentists and thousands of local businesses instantly.
+</p>
 
-<!-- TOOL -->
-<section class="tool-section">
-  <div class="tool-header">
-    <h2 data-en="🔍 Extract Business Leads" data-ar="🔍 استخرج بيانات الأعمال">🔍 Extract Business Leads</h2>
-    <p data-en="Search by business type, keyword or location below" data-ar="ابحث بنوع النشاط التجاري، كلمة مفتاحية أو موقع">Search by business type, keyword or location below</p>
-  </div>
+<div class="search-box">
 
-  <div class="search-box">
-    <div class="search-row">
-      <input class="search-input" id="leadSearch" type="text"
-        placeholder="e.g. restaurants in Dubai, lawyers in Riyadh..."
-        data-placeholder-en="e.g. restaurants in Dubai, lawyers in Riyadh..."
-        data-placeholder-ar="مثل: مطاعم في دبي، محامون في الرياض..."
-        oninput="onSearchInput(this)" onkeydown="if(event.key==='Enter')searchLeads()">
-      <button class="search-submit" id="searchBtn" onclick="searchLeads()" data-en="SEARCH" data-ar="بحث">SEARCH</button>
-    </div>
-    <div class="spell-hint" id="spellHint">
-      <span id="spellText"></span>
-    </div>
-    <div class="suggestions" id="suggestions">
-      <span class="suggestion-tag" onclick="useSuggestion(this)" data-en="Restaurants Dubai" data-ar="مطاعم دبي">Restaurants Dubai</span>
-      <span class="suggestion-tag" onclick="useSuggestion(this)" data-en="Hotels Riyadh" data-ar="فنادق الرياض">Hotels Riyadh</span>
-      <span class="suggestion-tag" onclick="useSuggestion(this)" data-en="Dentists Cairo" data-ar="أطباء أسنان القاهرة">Dentists Cairo</span>
-      <span class="suggestion-tag" onclick="useSuggestion(this)" data-en="Law Firms Beirut" data-ar="شركات قانونية بيروت">Law Firms Beirut</span>
-      <span class="suggestion-tag" onclick="useSuggestion(this)" data-en="Gyms Abu Dhabi" data-ar="صالات رياضية أبوظبي">Gyms Abu Dhabi</span>
-      <span class="suggestion-tag" onclick="useSuggestion(this)" data-en="Pharmacies Amman" data-ar="صيدليات عمّان">Pharmacies Amman</span>
-    </div>
-  </div>
+<div class="search-row">
+<input
+type="text"
+class="search-input"
+id="query"
+placeholder="restaurants in Dubai..."
+>
 
-  <div class="loading" id="loading">
-    <div class="spinner"></div>
-    <p data-en="Searching businesses and extracting lead data..." data-ar="جاري البحث عن الأعمال واستخراج البيانات...">Searching businesses and extracting lead data...</p>
-  </div>
-
-  <div class="results-section" id="results">
-    <div class="results-header">
-      <div class="results-count">
-        <span data-en="Showing" data-ar="عرض">Showing</span>
-        <strong id="resultCount">0</strong>
-        <span data-en="leads found" data-ar="نتيجة">leads found</span>
-      </div>
-      <div class="export-btns">
-        <button class="export-btn export-csv" onclick="exportCSV()">
-          📊 <span data-en="Export CSV" data-ar="تصدير CSV">Export CSV</span>
-        </button>
-        <button class="export-btn export-json" onclick="exportJSON()">
-          📦 <span data-en="Export JSON" data-ar="تصدير JSON">Export JSON</span>
-        </button>
-      </div>
-    </div>
-    <div id="resultsList"></div>
-  </div>
-</section>
-
-<!-- AD BANNER -->
-<div class="ad-banner">
-  <div class="ad-card">
-    <div class="ad-left">
-      <h3 data-en="📢 Advertise Your Domain For Sale" data-ar="📢 اعرض دومينك للبيع">📢 Advertise Your Domain For Sale</h3>
-      <p data-en="Feature your domain in front of thousands of buyers every month" data-ar="اعرض دومينك أمام آلاف المشترين كل شهر">Feature your domain in front of thousands of buyers every month</p>
-    </div>
-    <div class="ad-price">$2 <small data-en="/month" data-ar="/شهر">/month</small></div>
-    <button class="ad-cta" onclick="alert('Contact us to list your domain!')" data-en="List My Domain →" data-ar="اعرض دوميني ←">List My Domain →</button>
-  </div>
+<button class="search-btn" onclick="searchLeads()" id="searchBtn">
+SEARCH
+</button>
 </div>
 
-<!-- DOMAINS FOR SALE -->
-<section class="domains-section">
-  <div class="domains-header">
-    <h2 data-en="🏷️ Premium Domains For Sale" data-ar="🏷️ دومينات مميزة للبيع">🏷️ Premium Domains For Sale</h2>
-    <p data-en="Grab a premium domain before someone else does — click to buy on GoDaddy" data-ar="احصل على دومين مميز قبل غيرك — انقر للشراء عبر GoDaddy">Grab a premium domain before someone else does — click to buy on GoDaddy</p>
-  </div>
-  <div class="domains-grid" id="domainsGrid"></div>
+<div class="tags">
+<div class="tag" onclick="fill('Restaurants Dubai')">Restaurants Dubai</div>
+<div class="tag" onclick="fill('Hotels Riyadh')">Hotels Riyadh</div>
+<div class="tag" onclick="fill('Dentists Cairo')">Dentists Cairo</div>
+<div class="tag" onclick="fill('Lawyers London')">Lawyers London</div>
+<div class="tag" onclick="fill('Gyms Istanbul')">Gyms Istanbul</div>
+</div>
+
+</div>
 </section>
 
-<!-- FOOTER -->
-<footer>
-  <p>© 2025 <strong>MapLeads</strong> · <a href="#">Privacy</a> · <a href="#">Terms</a> · Built for lead hunters worldwide</p>
-  <p style="margin-top:8px; font-size:.75rem; color:var(--muted)">MapLeads is not affiliated with Google Maps or any third-party mapping service.</p>
-</footer>
+<div class="loading" id="loading">
+<div class="spinner"></div>
+<p style="margin-top:20px;color:#9ca3af;">
+Searching businesses...
+</p>
+</div>
+
+<section class="results" id="results">
+
+<div class="results-top">
+<h2>
+Results Found:
+<span id="count">0</span>
+</h2>
+
+<div class="export-buttons">
+<button class="export-btn csv" onclick="exportCSV()">
+Export CSV
+</button>
+
+<button class="export-btn json" onclick="exportJSON()">
+Export JSON
+</button>
+</div>
+</div>
+
+<div class="grid" id="resultsGrid"></div>
+
+</section>
+
+<section class="domains">
+
+<h2>Premium Domains For Sale</h2>
+
+<div class="domain-grid">
+
+<a class="domain" href="https://www.godaddy.com/domainsearch/find?domainToCheck=KrishnaSilks.com" target="_blank">
+<div class="domain-name">KrishnaSilks.com</div>
+<div class="buy">Buy</div>
+</a>
+
+<a class="domain" href="https://www.godaddy.com/domainsearch/find?domainToCheck=CieloLounge.com" target="_blank">
+<div class="domain-name">CieloLounge.com</div>
+<div class="buy">Buy</div>
+</a>
+
+<a class="domain" href="https://www.godaddy.com/domainsearch/find?domainToCheck=CarsLiftDubai.com" target="_blank">
+<div class="domain-name">CarsLiftDubai.com</div>
+<div class="buy">Buy</div>
+</a>
+
+<a class="domain" href="https://www.godaddy.com/domainsearch/find?domainToCheck=Paybass.com" target="_blank">
+<div class="domain-name">Paybass.com</div>
+<div class="buy">Buy</div>
+</a>
+
+</div>
+
+</section>
+
+<div class="footer">
+© 2025 MapLeads — Lead Generation Tool
+</div>
 
 <script>
-// ─── CONFIG ────────────────────────────────────────────────
-const ANTHROPIC_API_KEY = 'YOUR_API_KEY_HERE'; // Replace with your key on Vercel
 
-// ─── DOMAINS DATA ──────────────────────────────────────────
-const DOMAINS = [
-  { name:'EdgeList', ext:'.ai', full:'EdgeList.ai', color:'#00e5ff,#7c3aed' },
-  { name:'SteelLevel', ext:'.com', full:'SteelLevel.com', color:'#f59e0b,#ef4444' },
-  { name:'Duoauction', ext:'.com', full:'Duoauction.com', color:'#10b981,#0891b2' },
-  { name:'BeamMCP', ext:'.com', full:'BeamMCP.com', color:'#8b5cf6,#ec4899' },
-  { name:'SumMCP', ext:'.com', full:'SumMCP.com', color:'#f59e0b,#8b5cf6' },
-  { name:'JYA', ext:'.io', full:'JYA.io', color:'#00e5ff,#10b981' },
-  { name:'Cujn', ext:'.com', full:'Cujn.com', color:'#ef4444,#f59e0b' },
-  { name:'CarsLiftDubai', ext:'.com', full:'CarsLiftDubai.com', color:'#7c3aed,#00e5ff' },
-  { name:'KrishnaSilks', ext:'.com', full:'KrishnaSilks.com', color:'#ec4899,#f59e0b' },
-  { name:'CieloLounge', ext:'.com', full:'CieloLounge.com', color:'#0891b2,#8b5cf6' },
-  { name:'Siwet', ext:'.com', full:'Siwet.com', color:'#10b981,#7c3aed' },
-  { name:'Paybass', ext:'.com', full:'Paybass.com', color:'#f59e0b,#10b981' },
-  { name:'LividShop', ext:'.com', full:'LividShop.com', color:'#ef4444,#8b5cf6' },
-  { name:'RichKids', ext:'.ai', full:'RichKids.ai', color:'#f59e0b,#ef4444' },
-  { name:'Fox', ext:'.yachts', full:'Fox.yachts', color:'#0891b2,#f59e0b' },
-  { name:'Gvri', ext:'.xyz', full:'Gvri.xyz', color:'#8b5cf6,#00e5ff' },
-];
-
-function renderDomains() {
-  const grid = document.getElementById('domainsGrid');
-  grid.innerHTML = DOMAINS.map(d => {
-    const initials = d.name.slice(0,2).toUpperCase();
-    const [c1,c2] = d.color.split(',');
-    const godaddyUrl = `https://www.godaddy.com/domainsearch/find?checkAvail=1&tmskey=&domainToCheck=${d.full}`;
-    return `
-    <a class="domain-card" href="${godaddyUrl}" target="_blank" rel="noopener">
-      <div class="domain-left">
-        <div class="domain-logo" style="background:linear-gradient(135deg,${c1},${c2})">${initials}</div>
-        <div>
-          <div class="domain-name">${d.name}</div>
-          <div class="domain-ext">${d.ext}</div>
-        </div>
-      </div>
-      <div class="domain-buy">🛒 Buy</div>
-    </a>`;
-  }).join('');
-}
-
-// ─── MAP INIT ──────────────────────────────────────────────
-let map, selectedMarker;
-let selectedLat = null, selectedLng = null;
-
-function initMap() {
-  map = L.map('map', { zoomControl:true }).setView([25, 45], 5);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    attribution:'&copy; <a href="https://carto.com/">CARTO</a>',
-    maxZoom:19
-  }).addTo(map);
-
-  map.on('click', function(e) {
-    selectedLat = e.latlng.lat.toFixed(6);
-    selectedLng = e.latlng.lng.toFixed(6);
-    if (selectedMarker) map.removeLayer(selectedMarker);
-    selectedMarker = L.marker(e.latlng, {
-      icon: L.divIcon({
-        html:`<div style="
-          width:32px;height:32px;
-          background:linear-gradient(135deg,#00e5ff,#7c3aed);
-          border-radius:50% 50% 50% 0;
-          transform:rotate(-45deg);
-          border:2px solid #fff;
-          box-shadow:0 0 15px rgba(0,229,255,0.6);
-        "></div>`,
-        iconSize:[32,32], iconAnchor:[16,32], className:''
-      })
-    }).addTo(map);
-    const query = document.getElementById('leadSearch').value;
-    if (query) {
-      const lang = document.body.dataset.lang;
-      document.getElementById('leadSearch').value = query + ` (${parseFloat(selectedLat).toFixed(3)}, ${parseFloat(selectedLng).toFixed(3)})`;
-    }
-    document.getElementById('mapHint').textContent =
-      `📍 Selected: ${parseFloat(selectedLat).toFixed(4)}, ${parseFloat(selectedLng).toFixed(4)} — Now search below!`;
-  });
-}
-
-async function searchOnMap() {
-  const q = document.getElementById('mapSearch').value;
-  if (!q) return;
-  try {
-    const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1`);
-    const data = await r.json();
-    if (data.length) {
-      map.setView([data[0].lat, data[0].lon], 13);
-    }
-  } catch(e) {}
-}
-
-// ─── SPELL CHECK & SUGGESTIONS ─────────────────────────────
-const COMMON_CORRECTIONS = {
-  'restoran':'restaurant','resturant':'restaurant','restorant':'restaurant',
-  'hotl':'hotel','hotell':'hotel','mataam':'restaurant',
-  'doktoor':'doctor','docter':'doctor','dokter':'doctor',
-  'laywer':'lawyer','lawer':'lawyer','lawyr':'lawyer',
-  'phramacy':'pharmacy','farmacy':'pharmacy',
-};
-
-function onSearchInput(el) {
-  const val = el.value.toLowerCase().trim();
-  const words = val.split(/\s+/);
-  let corrected = false;
-  const hint = document.getElementById('spellHint');
-  const hintText = document.getElementById('spellText');
-
-  for (const w of words) {
-    if (COMMON_CORRECTIONS[w]) {
-      const suggestion = val.replace(w, COMMON_CORRECTIONS[w]);
-      const lang = document.body.dataset.lang;
-      hintText.innerHTML = lang==='ar'
-        ? `هل تقصد: <span onclick="document.getElementById('leadSearch').value='${suggestion}'; document.getElementById('spellHint').style.display='none'">${suggestion}</span>?`
-        : `Did you mean: <span onclick="document.getElementById('leadSearch').value='${suggestion}'; document.getElementById('spellHint').style.display='none'">${suggestion}</span>?`;
-      hint.style.display = 'block';
-      corrected = true;
-      break;
-    }
-  }
-  if (!corrected) hint.style.display = 'none';
-}
-
-function useSuggestion(el) {
-  const lang = document.body.dataset.lang;
-  document.getElementById('leadSearch').value = lang==='ar' ? el.dataset.ar : el.dataset.en;
-  searchLeads();
-}
-
-// ─── AI SEARCH ─────────────────────────────────────────────
 let currentResults = [];
 
-async function searchLeads() {
-  const query = document.getElementById('leadSearch').value.trim();
-  if (!query) return;
-
-  document.getElementById('loading').style.display = 'block';
-  document.getElementById('results').style.display = 'none';
-  document.getElementById('searchBtn').disabled = true;
-
-  const locationContext = selectedLat ? ` near coordinates (${selectedLat}, ${selectedLng})` : '';
-  const lang = document.body.dataset.lang;
-
-  const prompt = `You are a business lead extraction engine. Generate realistic sample business leads for: "${query}"${locationContext}.
-
-Return ONLY a JSON array (no markdown, no explanation) with exactly 8 objects. Each object must have:
-- "name": business name (string)
-- "location": full address (string)  
-- "phone": phone number with country code (string)
-- "email": business email (string)
-- "website": website URL (string, start with https://)
-- "facebook": Facebook page URL or null
-- "instagram": Instagram handle URL or null
-- "whatsapp": WhatsApp link (https://wa.me/...) or null
-- "twitter": Twitter/X URL or null
-- "rating": rating out of 5 (number, 1 decimal)
-- "category": business category (string)
-
-Make the data realistic and specific to the region/query. Phone numbers should match the country. Respond in ${lang==='ar'?'Arabic for location names but keep URLs in English':'English'}.`;
-
-  try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version':'2023-06-01',
-        'anthropic-dangerous-direct-browser-access':'true'
-      },
-      body: JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:2000,
-        messages:[{ role:'user', content:prompt }]
-      })
-    });
-
-    const data = await response.json();
-    const text = data.content?.[0]?.text || '[]';
-    const clean = text.replace(/```json|```/g,'').trim();
-    currentResults = JSON.parse(clean);
-    renderResults(currentResults, query);
-  } catch(err) {
-    console.error(err);
-    // Fallback demo data
-    currentResults = generateFallback(query);
-    renderResults(currentResults, query);
-  }
-
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('searchBtn').disabled = false;
+function fill(text){
+document.getElementById('query').value = text;
 }
 
-function generateFallback(query) {
-  return Array.from({length:8}, (_,i) => ({
-    name:`${query} Business ${i+1}`,
-    location:`Street ${i+1}, Downtown, City`,
-    phone:`+1 555-${String(1000+i*111).padStart(4,'0')}`,
-    email:`info@business${i+1}.com`,
-    website:`https://business${i+1}.com`,
-    facebook:`https://facebook.com/business${i+1}`,
-    instagram:`https://instagram.com/business${i+1}`,
-    whatsapp:`https://wa.me/1555${1000+i*111}`,
-    twitter:null,
-    rating:(3.5+Math.random()*1.5).toFixed(1),
-    category:query.split(' ')[0]
-  }));
-}
+async function searchLeads(){
 
-function renderResults(data, query) {
-  document.getElementById('resultCount').textContent = data.length;
-  document.getElementById('resultsList').innerHTML = data.map((b,i) => `
-    <div class="result-card">
-      <div class="result-name">
-        ⭐ ${b.rating} &nbsp;·&nbsp; ${b.name}
-        <span style="font-size:.75rem;color:var(--muted);font-weight:400;margin-left:8px;">${b.category||''}</span>
-      </div>
-      <div class="result-grid">
-        ${b.location ? `<div class="result-field"><span class="field-icon">📍</span><div><span class="field-label">Location</span><span class="field-value">${b.location}</span></div></div>` : ''}
-        ${b.phone ? `<div class="result-field"><span class="field-icon">📞</span><div><span class="field-label">Phone</span><span class="field-value"><a href="tel:${b.phone}">${b.phone}</a></span></div></div>` : ''}
-        ${b.email ? `<div class="result-field"><span class="field-icon">✉️</span><div><span class="field-label">Email</span><span class="field-value"><a href="mailto:${b.email}">${b.email}</a></span></div></div>` : ''}
-        ${b.website ? `<div class="result-field"><span class="field-icon">🌐</span><div><span class="field-label">Website</span><span class="field-value"><a href="${b.website}" target="_blank">${b.website}</a></span></div></div>` : ''}
-        <div class="result-field" style="grid-column:1/-1"><span class="field-icon">📱</span><div><span class="field-label">Social Media</span><div class="social-icons" style="margin-top:6px">
-          ${b.facebook ? `<a class="social-link" href="${b.facebook}" target="_blank">👤 Facebook</a>` : ''}
-          ${b.instagram ? `<a class="social-link" href="${b.instagram}" target="_blank">📸 Instagram</a>` : ''}
-          ${b.whatsapp ? `<a class="social-link" href="${b.whatsapp}" target="_blank">💬 WhatsApp</a>` : ''}
-          ${b.twitter ? `<a class="social-link" href="${b.twitter}" target="_blank">🐦 Twitter</a>` : ''}
-        </div></div></div>
-      </div>
-    </div>
-  `).join('');
-  document.getElementById('results').style.display = 'block';
-  document.getElementById('results').scrollIntoView({ behavior:'smooth', block:'start' });
-}
+const query = document.getElementById('query').value.trim();
 
-// ─── EXPORT ────────────────────────────────────────────────
-function exportCSV() {
-  if (!currentResults.length) return;
-  const headers = ['Name','Location','Phone','Email','Website','Facebook','Instagram','WhatsApp','Rating'];
-  const rows = currentResults.map(b => [
-    b.name, b.location, b.phone, b.email, b.website,
-    b.facebook||'', b.instagram||'', b.whatsapp||'', b.rating
-  ].map(v => `"${(v||'').toString().replace(/"/g,'""')}"`).join(','));
-  const csv = [headers.join(','), ...rows].join('\n');
-  const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'mapleads-export.csv'; a.click();
-  URL.revokeObjectURL(url);
-}
+if(!query) return;
 
-function exportJSON() {
-  if (!currentResults.length) return;
-  const blob = new Blob([JSON.stringify(currentResults, null, 2)], { type:'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'mapleads-export.json'; a.click();
-  URL.revokeObjectURL(url);
-}
+document.getElementById('loading').style.display='block';
+document.getElementById('results').style.display='none';
 
-// ─── LANGUAGE TOGGLE ───────────────────────────────────────
-function toggleLang() {
-  const body = document.body;
-  const isAr = body.dataset.lang === 'ar';
-  body.dataset.lang = isAr ? 'en' : 'ar';
-  body.style.direction = isAr ? 'ltr' : 'rtl';
-  document.getElementById('langBtn').textContent = isAr ? '🌐 العربية' : '🌐 English';
+try{
 
-  // Update all text nodes
-  document.querySelectorAll('[data-en]').forEach(el => {
-    const text = isAr ? el.dataset.en : el.dataset.ar;
-    if (text) el.innerHTML = text;
-  });
-  document.querySelectorAll('[data-placeholder-en]').forEach(el => {
-    el.placeholder = isAr ? el.dataset['placeholder-en'] : el.dataset['placeholder-ar'];
-  });
-  // Update suggestion tags
-  document.querySelectorAll('.suggestion-tag').forEach(el => {
-    el.textContent = isAr ? el.dataset.en : el.dataset.ar;
-  });
-}
-
-// ─── INIT ──────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  initMap();
-  renderDomains();
-
-  // Map search on enter
-  document.getElementById('mapSearch').addEventListener('keydown', e => {
-    if (e.key === 'Enter') searchOnMap();
-  });
-
-  // Animate hero stats
-  document.querySelectorAll('.stat-num').forEach(el => {
-    el.style.animation = 'fadeIn .5s ease forwards';
-  });
+const response = await fetch('/api/search', {
+method:'POST',
+headers:{
+'Content-Type':'application/json'
+},
+body:JSON.stringify({ q:query })
 });
+
+const data = await response.json();
+
+currentResults = data;
+
+renderResults(data);
+
+}catch(err){
+
+alert('Error loading results');
+
+console.error(err);
+
+}
+
+document.getElementById('loading').style.display='none';
+
+}
+
+function renderResults(data){
+
+document.getElementById('count').textContent = data.length;
+
+const grid = document.getElementById('resultsGrid');
+
+grid.innerHTML = data.map(b => `
+
+<div class="card">
+
+<div class="name">
+${b.name || 'Business'}
+</div>
+
+<div class="field">
+📍 ${b.location || ''}
+</div>
+
+<div class="field">
+📞 <a href="tel:${b.phone || ''}">
+${b.phone || ''}
+</a>
+</div>
+
+<div class="field">
+✉️ <a href="mailto:${b.email || ''}">
+${b.email || ''}
+</a>
+</div>
+
+<div class="field">
+🌐 <a href="${b.website || '#'}" target="_blank">
+${b.website || ''}
+</a>
+</div>
+
+<div class="field">
+⭐ Rating: ${b.rating || '4.5'}
+</div>
+
+</div>
+
+`).join('');
+
+document.getElementById('results').style.display='block';
+
+}
+
+function exportCSV(){
+
+if(!currentResults.length) return;
+
+const headers = ['Name','Location','Phone','Email','Website','Rating'];
+
+const rows = currentResults.map(r => [
+r.name,
+r.location,
+r.phone,
+r.email,
+r.website,
+r.rating
+]);
+
+let csv = headers.join(',') + '\n';
+
+rows.forEach(r=>{
+csv += r.map(v => `"${v || ''}"`).join(',') + '\n';
+});
+
+const blob = new Blob([csv], { type:'text/csv' });
+
+const url = URL.createObjectURL(blob);
+
+const a = document.createElement('a');
+
+a.href = url;
+a.download = 'mapleads.csv';
+
+a.click();
+
+URL.revokeObjectURL(url);
+
+}
+
+function exportJSON(){
+
+const blob = new Blob(
+[JSON.stringify(currentResults,null,2)],
+{ type:'application/json' }
+);
+
+const url = URL.createObjectURL(blob);
+
+const a = document.createElement('a');
+
+a.href = url;
+a.download = 'mapleads.json';
+
+a.click();
+
+URL.revokeObjectURL(url);
+
+}
+
+function toggleLang(){
+
+const title = document.getElementById('heroTitle');
+const text = document.getElementById('heroText');
+
+if(document.body.dir === 'ltr'){
+
+document.body.dir='rtl';
+
+title.innerHTML='اكتشف بيانات الشركات<br>من أي مدينة';
+
+text.innerHTML='ابحث عن المطاعم والفنادق والشركات المحلية واستخرج بيانات العملاء بسهولة';
+
+}else{
+
+document.body.dir='ltr';
+
+title.innerHTML='Find Business Leads<br>Anywhere';
+
+text.innerHTML='Search restaurants, hotels, lawyers, dentists and thousands of local businesses instantly';
+
+}
+
+}
+
 </script>
+
 </body>
 </html>
