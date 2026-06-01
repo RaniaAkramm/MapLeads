@@ -1,23 +1,42 @@
-// api/search.js
-
 export default async function handler(req, res) {
-    // 1. استقبال كلمة البحث من موقعك
+    // Receive the search query from the frontend
     const { q } = req.body;
 
     if (!q) {
-        return res.status(400).json({ error: "لم يتم إرسال كلمة بحث" });
+        return res.status(400).json({ error: "No search query provided" });
     }
 
     try {
-        // 2. الاتصال بـ SerpApi باستخدام المتغير السري (Environment Variable)
-        const response = await fetch(`https://serpapi.com/search.json?engine=google_maps&q=${encodeURIComponent(q)}&api_key=${process.env.SERP_API_KEY}`);
-        
-        const data = await response.json();
+        let allResults = [];
+        const maxPages = 10; // 10 pages * 20 results = 200 results
 
-        // 3. إرجاع النتائج إلى موقعك
-        res.status(200).json(data.local_results || []);
+        // Loop to fetch pages from SerpApi
+        for (let i = 0; i < maxPages; i++) {
+            const start = i * 20; 
+            
+            // Construct the URL with the start parameter for pagination
+            const url = `https://serpapi.com/search.json?engine=google_maps&q=${encodeURIComponent(q)}&start=${start}&api_key=${process.env.SERP_API_KEY}`;
+            
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            // If results exist, add them to our master list
+            if (data.local_results && data.local_results.length > 0) {
+                allResults = [...allResults, ...data.local_results];
+            } else {
+                // If no more results are found, exit the loop
+                break;
+            }
+
+            // Small delay to prevent hitting API rate limits
+            await new Promise(resolve => setTimeout(resolve, 500));
+        }
+
+        // Return the gathered data to your website
+        res.status(200).json(allResults);
         
     } catch (error) {
-        res.status(500).json({ error: "خطأ في الاتصال بـ SerpApi" });
+        console.error("Error fetching data:", error);
+        res.status(500).json({ error: "Failed to connect to SerpApi" });
     }
 }
