@@ -1,42 +1,57 @@
 export default async function handler(req, res) {
-    // Receive the search query from the frontend
-    const { q } = req.body;
+    // 1. Validate method and input
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: "Method not allowed, use POST" });
+    }
 
+    const { q } = req.body;
     if (!q) {
         return res.status(400).json({ error: "No search query provided" });
     }
 
     try {
         let allResults = [];
-        const maxPages = 10; // 10 pages * 20 results = 200 results
+        const maxPages = 10; 
+        const apiKey = process.env.SERP_API_KEY;
 
-        // Loop to fetch pages from SerpApi
+        if (!apiKey) {
+            throw new Error("SERP_API_KEY is not defined in environment variables");
+        }
+
+        // 2. Loop to fetch pages from SerpApi
         for (let i = 0; i < maxPages; i++) {
             const start = i * 20; 
-            
-            // Construct the URL with the start parameter for pagination
-            const url = `https://serpapi.com/search.json?engine=google_maps&q=${encodeURIComponent(q)}&start=${start}&api_key=${process.env.SERP_API_KEY}`;
+            const url = `https://serpapi.com/search.json?engine=google_maps&q=${encodeURIComponent(q)}&start=${start}&api_key=${apiKey}`;
             
             const response = await fetch(url);
-            const data = await response.json();
             
-            // If results exist, add them to our master list
-            if (data.local_results && data.local_results.length > 0) {
-                allResults = [...allResults, ...data.local_results];
-            } else {
-                // If no more results are found, exit the loop
+            if (!response.ok) {
+                console.error(`API request failed at page ${i + 1}`);
                 break;
             }
 
-            // Small delay to prevent hitting API rate limits
-            await new Promise(resolve => setTimeout(resolve, 500));
+            const data = await response.json();
+            
+            // 3. Extract results and ensure valid structure
+            if (data.local_results && Array.isArray(data.local_results)) {
+                allResults = [...allResults, ...data.local_results];
+            } else {
+                // If no more results are found or structure changes, break
+                break;
+            }
+
+            // 4. Rate limiting: Wait to avoid being blocked by the provider
+            await new Promise(resolve => setTimeout(resolve, 800));
         }
 
-        // Return the gathered data to your website
-        res.status(200).json(allResults);
+        // 5. Remove duplicates (in case of overlap) and return
+        const uniqueResults = Array.from(new Set(allResults.map(a => a.data_id)))
+            .map(id => allResults.find(a => a.data_id === id));
+
+        res.status(200).json(uniqueResults);
         
     } catch (error) {
-        console.error("Error fetching data:", error);
-        res.status(500).json({ error: "Failed to connect to SerpApi" });
+        console.error("Backend Error:", error.message);
+        res.status(500).json({ error: "Failed to fetch data from source" });
     }
 }
