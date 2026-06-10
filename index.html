@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Siwet MapLeads | Real Business Finder with Live Map</title>
+    <title>Siwet MapLeads | Real Business Finder – Live OSM Data</title>
     <!-- SEO Meta -->
     <meta name="description" content="Siwet MapLeads - Real business search & leads from OpenStreetMap. Find restaurants, shops, services worldwide with interactive map.">
     <meta name="keywords" content="business finder, real leads, map leads, siwet, local business, B2B leads, خريطة أعمال, بحث حقيقي, Firmensuche, recherche d'entreprise, 事業検索, 企业搜索">
@@ -145,6 +145,7 @@
         .domain-ad a { color: var(--accent); text-decoration: none; font-weight: bold; }
         .footer-credit { text-align: center; margin-top: 28px; font-size: 0.75rem; color: #4b5568; }
         i { margin-right: 5px; }
+        .error-box { background: rgba(220,38,38,0.2); border-left: 4px solid #ef4444; padding: 16px; border-radius: 16px; margin-top: 20px; text-align: center; }
     </style>
 </head>
 <body>
@@ -205,12 +206,12 @@
 <script>
     // ---------- MULTI-LANGUAGE ----------
     const translations = {
-        en: { tagline:"Real Business Data | Live from OSM", locationLabel:"📍 Location (City/Country)", keywordLabel:"🔍 Business Keyword", searchBtn:"Search Real Leads & Map", loadingMsg:"Fetching real businesses from OpenStreetMap...", resultsTitle:"Live Business Leads", adText:"Premium domain for sale on", adCta:"— Own this brand today!", credit:"Powered by OpenStreetMap", noResults:"No real businesses found. Try another keyword or location." },
-        ar: { tagline:"بيانات حقيقية للأعمال | مباشر من OSM", locationLabel:"📍 الموقع (مدينة/دولة)", keywordLabel:"🔍 كلمة البحث (نشاط تجاري)", searchBtn:"بحث حقيقي عن عملاء وخريطة", loadingMsg:"جلب بيانات حقيقية من OpenStreetMap...", resultsTitle:"قادة الأعمال المباشرون", adText:"نطاق مميز للبيع على", adCta:"— امتلك هذه العلامة اليوم!", credit:"مدعوم من OpenStreetMap", noResults:"لم يتم العثور على أعمال حقيقية. جرب كلمة أخرى." },
-        de: { tagline:"Echte Firmendaten | Live von OSM", locationLabel:"📍 Standort (Stadt/Land)", keywordLabel:"🔍 Geschäftsbereich", searchBtn:"Echte Leads & Karte durchsuchen", loadingMsg:"Rufe echte Unternehmen von OpenStreetMap ab...", resultsTitle:"Echtzeit-Leads", adText:"Premium-Domain zu verkaufen auf", adCta:"— Sichern Sie sich diese Marke!", credit:"Betrieben mit OpenStreetMap", noResults:"Keine echten Unternehmen gefunden. Versuchen Sie ein anderes Keyword." },
-        fr: { tagline:"Données réelles | OpenStreetMap", locationLabel:"📍 Lieu (Ville/Pays)", keywordLabel:"🔍 Mot-clé métier", searchBtn:"Rechercher leads réels", loadingMsg:"Récupération des données OpenStreetMap...", resultsTitle:"Leads réels", adText:"Domaine premium en vente sur", adCta:"— Possédez cette marque!", credit:"Propulsé par OpenStreetMap", noResults:"Aucune entreprise réelle trouvée. Essayez un autre mot-clé." },
-        ja: { tagline:"実店舗データ | OSMライブ", locationLabel:"📍 場所 (都市/国)", keywordLabel:"🔍 ビジネスキーワード", searchBtn:"実際のリードを検索", loadingMsg:"OpenStreetMapから実際のビジネスを取得中...", resultsTitle:"リアルリード", adText:"プレミアムドメイン販売", adCta:"— このブランドを入手！", credit:"OpenStreetMap 提供", noResults:"実際の事業所が見つかりません。別のキーワードを試してください。" },
-        zh: { tagline:"真实商业数据 | 来自OSM", locationLabel:"📍 位置 (城市/国家)", keywordLabel:"🔍 商业关键词", searchBtn:"搜索真实线索与地图", loadingMsg:"从OpenStreetMap获取真实商家...", resultsTitle:"实时商业线索", adText:"优质域名出售", adCta:"— 拥有这个品牌！", credit:"由OpenStreetMap驱动", noResults:"未找到真实商家。请尝试其他关键词。" }
+        en: { tagline:"Real Business Data | Live from OSM", locationLabel:"📍 Location (City/Country)", keywordLabel:"🔍 Business Keyword", searchBtn:"Search Real Leads & Map", loadingMsg:"Fetching real businesses from OpenStreetMap...", resultsTitle:"Live Business Leads", adText:"Premium domain for sale on", adCta:"— Own this brand today!", credit:"Powered by OpenStreetMap", noResults:"No real businesses found. Try another keyword or location.", apiError:"OSM query error. Please simplify your keyword (avoid special characters)." },
+        ar: { tagline:"بيانات حقيقية للأعمال | مباشر من OSM", locationLabel:"📍 الموقع (مدينة/دولة)", keywordLabel:"🔍 كلمة البحث (نشاط تجاري)", searchBtn:"بحث حقيقي عن عملاء وخريطة", loadingMsg:"جلب بيانات حقيقية من OpenStreetMap...", resultsTitle:"قادة الأعمال المباشرون", adText:"نطاق مميز للبيع على", adCta:"— امتلك هذه العلامة اليوم!", credit:"مدعوم من OpenStreetMap", noResults:"لم يتم العثور على أعمال حقيقية. جرب كلمة أخرى.", apiError:"خطأ في استعلام OSM. يرجى تبسيط كلمتك (تجنب الأحرف الخاصة)." },
+        de: { tagline:"Echte Firmendaten | Live von OSM", locationLabel:"📍 Standort (Stadt/Land)", keywordLabel:"🔍 Geschäftsbereich", searchBtn:"Echte Leads & Karte durchsuchen", loadingMsg:"Rufe echte Unternehmen von OpenStreetMap ab...", resultsTitle:"Echtzeit-Leads", adText:"Premium-Domain zu verkaufen auf", adCta:"— Sichern Sie sich diese Marke!", credit:"Betrieben mit OpenStreetMap", noResults:"Keine echten Unternehmen gefunden. Versuchen Sie ein anderes Keyword.", apiError:"OSM-Abfragefehler. Bitte vereinfachen Sie Ihr Stichwort." },
+        fr: { tagline:"Données réelles | OpenStreetMap", locationLabel:"📍 Lieu (Ville/Pays)", keywordLabel:"🔍 Mot-clé métier", searchBtn:"Rechercher leads réels", loadingMsg:"Récupération des données OpenStreetMap...", resultsTitle:"Leads réels", adText:"Domaine premium en vente sur", adCta:"— Possédez cette marque!", credit:"Propulsé par OpenStreetMap", noResults:"Aucune entreprise réelle trouvée. Essayez un autre mot-clé.", apiError:"Erreur de requête OSM. Simplifiez votre mot-clé." },
+        ja: { tagline:"実店舗データ | OSMライブ", locationLabel:"📍 場所 (都市/国)", keywordLabel:"🔍 ビジネスキーワード", searchBtn:"実際のリードを検索", loadingMsg:"OpenStreetMapから実際のビジネスを取得中...", resultsTitle:"リアルリード", adText:"プレミアムドメイン販売", adCta:"— このブランドを入手！", credit:"OpenStreetMap 提供", noResults:"実際の事業所が見つかりません。別のキーワードを試してください。", apiError:"OSMクエリエラー。キーワードを簡略化してください。" },
+        zh: { tagline:"真实商业数据 | 来自OSM", locationLabel:"📍 位置 (城市/国家)", keywordLabel:"🔍 商业关键词", searchBtn:"搜索真实线索与地图", loadingMsg:"从OpenStreetMap获取真实商家...", resultsTitle:"实时商业线索", adText:"优质域名出售", adCta:"— 拥有这个品牌！", credit:"由OpenStreetMap驱动", noResults:"未找到真实商家。请尝试其他关键词。", apiError:"OSM查询错误。请简化关键词（避免特殊字符）。" }
     };
     let currentLang = "en";
     function updateUI(lang) {
@@ -238,7 +239,6 @@
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '© OSM & CartoDB', subdomains:'abcd', maxZoom:19 }).addTo(map);
     let markersLayer = L.layerGroup().addTo(map);
 
-    // Helper: clear results
     function clearResults() {
         markersLayer.clearLayers();
         document.getElementById("resultsGrid").innerHTML = "";
@@ -254,65 +254,78 @@
         throw new Error("Location not found");
     }
 
-    // Overpass API: real business search by keyword + bounding box
+    // Escape keyword for Overpass regex (safe)
+    function escapeOverpassKeyword(keyword) {
+        // Remove any characters that could break OverpassQL regex
+        return keyword.replace(/[<>\\/&;`'"$*?]/g, '').trim();
+    }
+
+    // Fetch real businesses using Overpass API
     async function fetchRealBusinesses(keyword, bbox) {
-        // bbox: [south, west, north, east] or [minLat, minLon, maxLat, maxLon]
+        const safeKeyword = escapeOverpassKeyword(keyword);
+        if(safeKeyword.length === 0) throw new Error("Invalid keyword after sanitization");
+        
         const [south, west, north, east] = bbox;
-        // Query: find nodes/ways with any tag 'name' containing keyword (case-insensitive) OR amenity/shop like keyword
-        // More robust: search for 'name' ~ keyword (regex) or 'shop'~keyword / 'amenity'~keyword
-        // Using regex in Overpass is heavy. Let's search for "name" approximately matching keyword + common tags.
-        // For simplicity but real: search for any object where name ~ keyword (case-insensitive)
-        const overpassQuery = `
-            [out:json][timeout:60];
-            (
-                node["name"~"${keyword}" i](${south},${west},${north},${east});
-                way["name"~"${keyword}" i](${south},${west},${north},${east});
-                node["shop"~"${keyword}" i](${south},${west},${north},${east});
-                way["shop"~"${keyword}" i](${south},${west},${north},${east});
-                node["amenity"~"${keyword}" i](${south},${west},${north},${east});
-                way["amenity"~"${keyword}" i](${south},${west},${north},${east});
-            );
-            out body center;
-        `;
+        // Use a robust query: nodes/ways with name containing keyword (case-insensitive)
+        // Also include shop/amenity tags to catch more businesses
+        const overpassQuery = `[out:json][timeout:45];
+        (
+          node["name"~"${safeKeyword}", i](${south},${west},${north},${east});
+          way["name"~"${safeKeyword}", i](${south},${west},${north},${east});
+          node["shop"~"${safeKeyword}", i](${south},${west},${north},${east});
+          way["shop"~"${safeKeyword}", i](${south},${west},${north},${east});
+          node["amenity"~"${safeKeyword}", i](${south},${west},${north},${east});
+          way["amenity"~"${safeKeyword}", i](${south},${west},${north},${east});
+        );
+        out body center;`;
+        
         const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`;
         const response = await fetch(url);
+        
+        // Overpass may return XML error if query malformed or rate limited
+        const contentType = response.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+            const text = await response.text();
+            console.error("Overpass non-JSON response:", text.substring(0, 200));
+            throw new Error(translations[currentLang]?.apiError || "OSM query format error. Try a simpler keyword (e.g., 'cafe' instead of 'cafe & restaurant').");
+        }
+        
         const data = await response.json();
         if(!data.elements) return [];
-        // Convert to unified format
+        
         const results = [];
         for(let el of data.elements) {
-            let lat = el.lat || (el.center ? el.center.lat : null);
-            let lon = el.lon || (el.center ? el.center.lon : null);
+            let lat = el.lat || (el.center?.lat);
+            let lon = el.lon || (el.center?.lon);
             if(!lat || !lon) continue;
             const tags = el.tags || {};
             const name = tags.name || "Unnamed Business";
-            const address = tags["addr:street"] ? tags["addr:street"] : (tags["addr:full"] || "Address not specified");
+            const address = tags["addr:street"] || tags["addr:full"] || "Address not specified";
             const phone = tags.phone || tags["contact:phone"] || null;
             const website = tags.website || tags.url || null;
             results.push({
                 name: name,
-                location: address || `${lat.toFixed(5)}, ${lon.toFixed(5)}`,
+                location: address,
                 phone: phone,
                 website: website,
                 lat: lat,
                 lng: lon
             });
         }
-        // Remove duplicates by name+location
+        // Remove duplicates (name+location)
         const unique = [];
         const seen = new Set();
         for(let b of results) {
             const key = b.name + b.location;
             if(!seen.has(key)) { seen.add(key); unique.push(b); }
         }
-        return unique.slice(0, 200); // max 200
+        return unique.slice(0, 200);
     }
 
-    // Render businesses on map & grid
     function renderBusinesses(businesses, centerCoords) {
         const grid = document.getElementById("resultsGrid");
         if(!businesses.length) {
-            grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px;">${translations[currentLang].noResults}</div>`;
+            grid.innerHTML = `<div class="error-box"><i class="fas fa-store-slash"></i> ${translations[currentLang].noResults}</div>`;
             document.getElementById("resultCount").innerText = `0 ${translations[currentLang]?.resultsTitle || "businesses"}`;
             return;
         }
@@ -327,7 +340,7 @@
                 </div>
             </div>
         `).join('');
-        // Add markers and fit bounds
+        
         const bounds = [];
         businesses.forEach(b => {
             if(b.lat && b.lng) {
@@ -342,36 +355,36 @@
 
     function escapeHtml(str) { return String(str).replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
 
-    // Main search using REAL Overpass API
+    // Main search function
     async function performRealSearch() {
         const locationRaw = document.getElementById("locationInput").value.trim();
-        const keyword = document.getElementById("keywordInput").value.trim();
+        let keyword = document.getElementById("keywordInput").value.trim();
         if(!locationRaw || !keyword) {
             alert("Please enter both location and keyword.");
             return;
         }
+        
         const loadingDiv = document.getElementById("loading");
         const searchBtn = document.getElementById("searchBtn");
         loadingDiv.style.display = "block";
         searchBtn.disabled = true;
         clearResults();
+        
         try {
-            // 1. Get coordinates + bounding box of the location (expanded for better coverage)
             const geo = await geocodeLocation(locationRaw);
-            // Expand bounding box: ~0.2 degrees (~20km) around point
-            const delta = 0.2;
+            const delta = 0.2;  // ~20km radius
             const bbox = [geo.lat - delta, geo.lon - delta, geo.lat + delta, geo.lon + delta];
-            // 2. Fetch real businesses from OSM
             const businesses = await fetchRealBusinesses(keyword, bbox);
-            if(businesses.length === 0) {
-                renderBusinesses([], geo);
-            } else {
-                renderBusinesses(businesses, geo);
-            }
+            renderBusinesses(businesses, geo);
         } catch(err) {
             console.error(err);
-            alert(`Error: ${err.message}. Please check location name or try a broader keyword.`);
-            document.getElementById("resultsGrid").innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px;">⚠️ ${err.message}</div>`;
+            let errorMsg = err.message || "Unknown error";
+            if(errorMsg.includes("OSM query format") || errorMsg.includes("simplify")) {
+                // show specific advice
+                errorMsg = translations[currentLang]?.apiError || "Query error. Try a single word like 'cafe' or 'hotel'.";
+            }
+            document.getElementById("resultsGrid").innerHTML = `<div class="error-box"><i class="fas fa-exclamation-triangle"></i> ${escapeHtml(errorMsg)}</div>`;
+            document.getElementById("resultCount").innerHTML = `0 results`;
         } finally {
             loadingDiv.style.display = "none";
             searchBtn.disabled = false;
@@ -379,8 +392,7 @@
     }
 
     document.getElementById("searchBtn").addEventListener("click", performRealSearch);
-    // Auto-load example on start
-    window.addEventListener("load", () => setTimeout(performRealSearch, 300));
+    window.addEventListener("load", () => setTimeout(performRealSearch, 400));
 </script>
 </body>
 </html>
