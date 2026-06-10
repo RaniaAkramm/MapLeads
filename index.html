@@ -1,424 +1,532 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Siwet MapLeads | Global Business Finder with Live Map</title>
-    <!-- SEO Meta (English + Arabic) -->
-    <meta name="description" content="Siwet MapLeads - Find real businesses, leads, contacts, emails, and WhatsApp numbers worldwide. Interactive map search for restaurants, shops, clinics, and more. B2B leads generator.">
-    <meta name="keywords" content="business finder, map leads, siwet, leads generation, B2B leads, local business search, email leads, WhatsApp business, أداة بحث عن الأعمال, خريطة الأعمال, توليد عملاء, Firmensuche, recherche d'entreprise, 事業検索, 企业搜索">
-    <meta name="author" content="Siwet MapLeads">
-    <meta property="og:title" content="Siwet MapLeads - Business Finder & Map">
-    <meta property="og:description" content="Discover real leads worldwide with interactive map. Get emails, phone numbers, websites.">
-    <meta property="og:type" content="website">
-    <!-- Leaflet CSS + JS -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- SEO Meta Tags (English & Arabic) -->
+    <meta name="description" content="Siwet MapLeads - Find local businesses with emails, WhatsApp, and websites. Business lead generation tool. أداة توليد عملاء محتملين مع خرائط.">
+    <meta name="keywords" content="map leads, business finder, lead generation, Google Maps scraping, Siwet MapLeads, أداة بحث عن الشركات, ايميلات, واتساب, خرائط, توليد عملاء, business emails, whatsapp numbers">
+    <title>Siwet MapLeads | Professional Business Finder</title>
+    
+    <!-- Leaflet CSS for the map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;600;700&display=swap" rel="stylesheet">
+    
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
             --accent: #00e5ff;
-            --bg-dark: #050a12;
-            --card-bg: #0f172ad9;
-            --card-solid: #111827;
-            --border-glow: #1e2a3e;
-            --text-light: #f1f5f9;
-            --text-dim: #94a3b8;
-            --whatsapp: #25D366;
-            --website: #8b5cf6;
-            --email: #f97316;
+            --bg: #070b14;
+            --card: #0f172a;
+            --card-border: #1e293b;
+            --text: #e2e8f0;
+            --btn-grad: linear-gradient(135deg, #00e5ff, #7c3aed);
         }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
         body {
-            font-family: 'Inter', sans-serif;
-            background: radial-gradient(circle at 10% 20%, #0a0f1c, #03060c);
-            color: var(--text-light);
-            padding: 20px 24px 40px;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
+            padding: 1rem;
+            transition: background 0.3s;
         }
-        .container { max-width: 1400px; margin: 0 auto; }
+
+        /* Pulse animation for the logo */
+        @keyframes pulse {
+            0% { text-shadow: 0 0 10px var(--accent); }
+            50% { text-shadow: 0 0 25px var(--accent), 0 0 50px #7c3aed; }
+            100% { text-shadow: 0 0 10px var(--accent); }
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(to right, var(--accent), #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: pulse 3s infinite;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
         .header {
             display: flex;
-            flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 32px;
-            gap: 20px;
-            border-bottom: 1px solid rgba(0,229,255,0.25);
-            padding-bottom: 18px;
-        }
-        .logo h1 {
-            font-size: 1.9rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #fff, var(--accent));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        .logo p { font-size: 0.8rem; color: var(--text-dim); }
-        .lang-selector {
-            display: flex;
-            gap: 8px;
             flex-wrap: wrap;
-            background: rgba(15,23,42,0.7);
-            backdrop-filter: blur(6px);
-            padding: 8px 16px;
-            border-radius: 50px;
-            border: 1px solid #2d3a4e;
+            gap: 1rem;
         }
-        .lang-btn {
-            background: transparent;
-            border: none;
-            color: var(--text-dim);
-            font-weight: 600;
+
+        .lang-switcher select {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            color: var(--text);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
             cursor: pointer;
-            padding: 6px 12px;
-            border-radius: 30px;
-            transition: 0.2s;
         }
-        .lang-btn.active, .lang-btn:hover { background: var(--accent); color: #03060c; box-shadow: 0 0 8px var(--accent);}
-        .search-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            border-radius: 32px;
-            padding: 24px 28px;
-            margin-bottom: 28px;
-            border: 1px solid var(--border-glow);
-            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.5);
-        }
-        .search-row { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; }
-        .input-group { flex: 1; min-width: 200px; }
-        .input-group label {
-            display: block;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            margin-bottom: 6px;
-            color: var(--accent);
-        }
-        .input-group input {
-            width: 100%;
-            padding: 14px 18px;
-            background: #0f172a;
-            border: 1px solid #2d3a5e;
-            border-radius: 20px;
-            color: white;
-            font-size: 1rem;
-        }
-        .input-group input:focus { outline: none; border-color: var(--accent); }
-        button.primary-btn {
-            background: linear-gradient(95deg, var(--accent), #00b8d4);
-            border: none;
-            padding: 14px 32px;
-            border-radius: 40px;
-            font-weight: 700;
-            cursor: pointer;
-            color: #03060c;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        .map-container { border-radius: 28px; overflow: hidden; margin-bottom: 32px; height: 420px; border: 1px solid #2a3c54; }
-        #map { height: 100%; width: 100%; background: #111827; }
-        .results-header { display: flex; justify-content: space-between; margin: 24px 0 16px; flex-wrap: wrap; }
-        .results-count { background: #1e293b; padding: 5px 14px; border-radius: 30px; font-size: 0.85rem; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 24px; margin-top: 12px; }
-        .card {
-            background: var(--card-solid);
-            border-radius: 24px;
-            padding: 20px;
-            border: 1px solid #253449;
-            transition: 0.25s;
-        }
-        .card:hover { transform: translateY(-5px); border-color: var(--accent); }
-        .card h3 { font-size: 1.25rem; margin-bottom: 10px; display: flex; gap: 8px; align-items: center; }
-        .card p { color: var(--text-dim); margin-bottom: 12px; display: flex; gap: 6px; align-items: center; font-size: 0.9rem; word-break: break-word; }
-        .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
-        .btn-icon {
-            padding: 6px 12px;
-            border-radius: 30px;
-            text-decoration: none;
-            font-size: 0.75rem;
-            font-weight: 600;
+
+        .ad-banner {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border: 1px solid #334155;
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-size: 0.85rem;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            transition: 0.2s;
+            gap: 8px;
+            margin: 1rem 0;
         }
-        .btn-wa { background: var(--whatsapp); color: #0a0f1c; }
-        .btn-web { background: var(--website); color: white; }
-        .btn-email { background: var(--email); color: white; }
-        .btn-icon:hover { filter: brightness(1.1); transform: scale(0.96); }
-        .loading { text-align: center; padding: 40px; display: none; }
-        .spinner { width: 45px; height: 45px; border: 4px solid #2d3a5e; border-top: 4px solid var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .domain-ad {
-            margin-top: 48px;
-            text-align: center;
-            background: linear-gradient(120deg, #0f172a, #030712);
-            border-radius: 60px;
-            padding: 12px 20px;
-            border: 1px solid #2d4a6e;
+
+        .ad-banner a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .search-box {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .search-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        input {
+            flex: 1;
+            padding: 0.9rem 1.2rem;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+            background: #1e293b;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(0,229,255,0.3);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 1rem;
+            margin-top: 1rem;
+            border: none;
+            border-radius: 12px;
+            background: var(--btn-grad);
+            color: white;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,229,255,0.4);
+        }
+
+        .map-results-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        #map {
+            height: 400px;
+            width: 100%;
+            border-radius: 20px;
+            border: 1px solid var(--card-border);
+            z-index: 1;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.2rem;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 1.2rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.5);
+        }
+
+        .card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .card p {
+            margin: 0.4rem 0;
+            color: #cbd5e1;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .actions {
+            margin-top: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .btn-wa {
+            background: #25D366;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .btn-web {
+            background: #7c3aed;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 8px;
+            text-decoration: none;
             font-size: 0.85rem;
         }
-        .domain-ad a { color: var(--accent); text-decoration: none; font-weight: bold; }
-        .footer-credit { text-align: center; margin-top: 28px; font-size: 0.7rem; color: #4b5568; }
-        i { margin-right: 4px; }
-        .error-box { background: rgba(220,38,38,0.2); border-left: 4px solid #ef4444; padding: 16px; border-radius: 16px; margin-top: 20px; text-align: center; }
-        @media (max-width: 700px) { body { padding: 16px; } .search-card { padding: 18px; } }
+
+        .btn-email {
+            background: #f59e0b;
+            color: black;
+            padding: 6px 14px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            font-size: 1.2rem;
+            color: var(--accent);
+        }
+
+        /* RTL support */
+        body.rtl {
+            direction: rtl;
+            text-align: right;
+        }
+
+        body.rtl .card p {
+            flex-direction: row-reverse;
+        }
+
+        @media (max-width: 600px) {
+            .search-row { flex-direction: column; }
+        }
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="header">
-        <div class="logo">
-            <h1><i class="fas fa-map-marked-alt"></i> Siwet MapLeads</h1>
-            <p data-i18n="tagline">Real Business Data | Email & WhatsApp Leads</p>
-        </div>
-        <div class="lang-selector">
-            <button class="lang-btn active" data-lang="en">🇬🇧 EN</button>
-            <button class="lang-btn" data-lang="ar">🇸🇦 عربي</button>
-            <button class="lang-btn" data-lang="de">🇩🇪 DE</button>
-            <button class="lang-btn" data-lang="fr">🇫🇷 FR</button>
-            <button class="lang-btn" data-lang="ja">🇯🇵 日本語</button>
-            <button class="lang-btn" data-lang="zh">🇨🇳 中文</button>
-        </div>
-    </div>
-
-    <div class="search-card">
-        <div class="search-row">
-            <div class="input-group">
-                <label data-i18n="locationLabel"><i class="fas fa-city"></i> Location (City/Country)</label>
-                <input type="text" id="locationInput" placeholder="e.g., Dubai, Paris, Tokyo" value="Dubai">
-            </div>
-            <div class="input-group">
-                <label data-i18n="keywordLabel"><i class="fas fa-briefcase"></i> Business Keyword</label>
-                <input type="text" id="keywordInput" placeholder="e.g., Restaurants, Clinics, Hotels" value="Restaurant">
+    <div class="container">
+        <div class="header">
+            <div class="logo">⚡ Siwet MapLeads</div>
+            <div class="lang-switcher">
+                <select id="langSelect" onchange="switchLanguage(this.value)">
+                    <option value="en">🇬🇧 English</option>
+                    <option value="ar">🇸🇦 العربية</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="zh">🇨🇳 中文</option>
+                </select>
             </div>
         </div>
-        <button class="primary-btn" id="searchBtn"><i class="fas fa-search-location"></i> <span data-i18n="searchBtn">Find Leads & Show on Map</span></button>
+
+        <!-- Small Domain Sale Ad -->
+        <div class="ad-banner">
+            💎 <span data-i18n="ad_text">Own this domain?</span> 
+            <a href="https://www.godaddy.com/domainsearch/find?domainToCheck=siwet.com" target="_blank" rel="nofollow">
+                Siwet.com
+            </a> 
+            <span data-i18n="ad_sale">is available on GoDaddy</span>
+        </div>
+
+        <div class="search-box">
+            <div class="search-row">
+                <input type="text" id="location" data-i18n-placeholder="placeholder_location" placeholder="City or Country (e.g., Dubai)">
+                <input type="text" id="keyword" data-i18n-placeholder="placeholder_keyword" placeholder="Keyword (e.g., Restaurants)">
+            </div>
+            <button class="btn-primary" onclick="searchLeads()" data-i18n="search_btn">🔍 Search Leads (Up to 200)</button>
+        </div>
+
+        <div id="loading" class="loading" style="display: none;" data-i18n="loading">Searching... please wait.</div>
+
+        <div class="map-results-container">
+            <div id="map"></div>
+            <div id="resultsGrid" class="results-grid"></div>
+        </div>
     </div>
 
-    <div class="map-container">
-        <div id="map"></div>
-    </div>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script>
+        // ---------- i18n Setup ----------
+        const translations = {
+            en: {
+                ad_text: "Own this domain?",
+                ad_sale: "is available on GoDaddy",
+                placeholder_location: "City or Country (e.g., Dubai)",
+                placeholder_keyword: "Keyword (e.g., Restaurants)",
+                search_btn: "🔍 Search Leads (Up to 200)",
+                loading: "Searching... please wait.",
+                no_results: "No businesses found.",
+                location_label: "📍",
+                phone_label: "📞",
+                website_label: "🌐",
+                email_label: "✉️",
+                whatsapp: "WhatsApp",
+                website: "Website",
+                email: "Email"
+            },
+            ar: {
+                ad_text: "تمتلك هذا النطاق؟",
+                ad_sale: "متاح على GoDaddy",
+                placeholder_location: "المدينة أو الدولة (مثال: دبي)",
+                placeholder_keyword: "كلمة مفتاحية (مثال: مطاعم)",
+                search_btn: "🔍 بحث عن عملاء (حتى 200)",
+                loading: "جاري البحث... الرجاء الانتظار.",
+                no_results: "لم يتم العثور على شركات.",
+                location_label: "📍",
+                phone_label: "📞",
+                website_label: "🌐",
+                email_label: "✉️",
+                whatsapp: "واتساب",
+                website: "الموقع",
+                email: "بريد"
+            },
+            de: {
+                ad_text: "Diese Domain besitzen?",
+                ad_sale: "verfügbar auf GoDaddy",
+                placeholder_location: "Stadt oder Land (z.B. Dubai)",
+                placeholder_keyword: "Stichwort (z.B. Restaurants)",
+                search_btn: "🔍 Leads suchen (bis zu 200)",
+                loading: "Suche... bitte warten.",
+                no_results: "Keine Unternehmen gefunden.",
+                location_label: "📍",
+                phone_label: "📞",
+                website_label: "🌐",
+                email_label: "✉️",
+                whatsapp: "WhatsApp",
+                website: "Webseite",
+                email: "E-Mail"
+            },
+            fr: {
+                ad_text: "Posséder ce domaine ?",
+                ad_sale: "disponible sur GoDaddy",
+                placeholder_location: "Ville ou pays (ex: Dubaï)",
+                placeholder_keyword: "Mot-clé (ex: Restaurants)",
+                search_btn: "🔍 Rechercher des prospects (jusqu'à 200)",
+                loading: "Recherche en cours... veuillez patienter.",
+                no_results: "Aucune entreprise trouvée.",
+                location_label: "📍",
+                phone_label: "📞",
+                website_label: "🌐",
+                email_label: "✉️",
+                whatsapp: "WhatsApp",
+                website: "Site web",
+                email: "E-mail"
+            },
+            ja: {
+                ad_text: "このドメインを所有する？",
+                ad_sale: "GoDaddyで利用可能",
+                placeholder_location: "都市または国 (例: ドバイ)",
+                placeholder_keyword: "キーワード (例: レストラン)",
+                search_btn: "🔍 リードを検索 (最大200件)",
+                loading: "検索中... お待ちください。",
+                no_results: "ビジネスが見つかりません。",
+                location_label: "📍",
+                phone_label: "📞",
+                website_label: "🌐",
+                email_label: "✉️",
+                whatsapp: "WhatsApp",
+                website: "ウェブサイト",
+                email: "メール"
+            },
+            zh: {
+                ad_text: "拥有此域名？",
+                ad_sale: "在GoDaddy上可用",
+                placeholder_location: "城市或国家（例如：迪拜）",
+                placeholder_keyword: "关键词（例如：餐厅）",
+                search_btn: "🔍 搜索潜在客户（最多200个）",
+                loading: "正在搜索... 请稍候。",
+                no_results: "未找到企业。",
+                location_label: "📍",
+                phone_label: "📞",
+                website_label: "🌐",
+                email_label: "✉️",
+                whatsapp: "WhatsApp",
+                website: "网站",
+                email: "电子邮件"
+            }
+        };
 
-    <div id="loading" class="loading">
-        <div class="spinner"></div>
-        <div data-i18n="loadingMsg">Searching real businesses from OpenStreetMap...</div>
-    </div>
-    <div class="results-header">
-        <h3 data-i18n="resultsTitle"><i class="fas fa-chart-line"></i> Business Leads (Email, WhatsApp, Website)</h3>
-        <div class="results-count" id="resultCount">0 businesses</div>
-    </div>
-    <div class="grid" id="resultsGrid"></div>
+        let currentLang = localStorage.getItem('siwet_lang') || 'en';
+        const langSelect = document.getElementById('langSelect');
+        langSelect.value = currentLang;
+        applyLanguage(currentLang);
 
-    <div class="domain-ad">
-        <i class="fas fa-tag"></i> <strong>🔥 Siwet.com</strong> <span data-i18n="adText">Premium domain for sale on</span>
-        <a href="https://www.godaddy.com/domainsearch/find?checkAvail=1&domainToCheck=siwet.com" target="_blank">GoDaddy Auctions</a>
-        <span data-i18n="adCta">— Own this brand today!</span>
-    </div>
-    <div class="footer-credit">
-        <i class="fas fa-database"></i> Powered by OpenStreetMap | <span data-i18n="credit">Siwet MapLeads Pro - Smart B2B Intelligence</span>
-    </div>
-</div>
-
-<script>
-    // ---------- MULTI-LANGUAGE ----------
-    const translations = {
-        en: { tagline:"Real Business Data | Email & WhatsApp Leads", locationLabel:"📍 Location (City/Country)", keywordLabel:"🔍 Business Keyword", searchBtn:"Find Leads & Show on Map", loadingMsg:"Searching real businesses from OpenStreetMap...", resultsTitle:"Business Leads (Email, WhatsApp, Website)", adText:"Premium domain for sale on", adCta:"— Own this brand today!", credit:"Smart B2B Intelligence", noResults:"No real businesses found. Try another keyword or location.", apiError:"OSM query error. Please use a simpler keyword (e.g., 'cafe', 'hotel')." },
-        ar: { tagline:"بيانات حقيقية للأعمال | البريد الإلكتروني وواتساب", locationLabel:"📍 الموقع (مدينة/دولة)", keywordLabel:"🔍 كلمة البحث (نشاط تجاري)", searchBtn:"ابحث عن عملاء واعرض على الخريطة", loadingMsg:"جلب بيانات حقيقية من OpenStreetMap...", resultsTitle:"قادة الأعمال (بريد إلكتروني، واتساب، موقع)", adText:"نطاق مميز للبيع على", adCta:"— امتلك هذه العلامة اليوم!", credit:"ذكاء الأعمال B2B", noResults:"لم يتم العثور على أعمال حقيقية. جرب كلمة أخرى.", apiError:"خطأ في استعلام OSM. يرجى استخدام كلمة أبسط (مثل 'مقهى')." },
-        de: { tagline:"Echte Firmendaten | E-Mail & WhatsApp Leads", locationLabel:"📍 Standort (Stadt/Land)", keywordLabel:"🔍 Geschäftsbereich", searchBtn:"Leads finden & auf Karte anzeigen", loadingMsg:"Rufe echte Unternehmen von OpenStreetMap ab...", resultsTitle:"Geschäftsleads (E-Mail, WhatsApp, Webseite)", adText:"Premium-Domain zu verkaufen auf", adCta:"— Sichern Sie sich diese Marke!", credit:"B2B-Intelligenz", noResults:"Keine echten Unternehmen gefunden. Versuchen Sie ein anderes Keyword.", apiError:"OSM-Abfragefehler. Bitte verwenden Sie ein einfacheres Stichwort." },
-        fr: { tagline:"Données réelles | Emails & WhatsApp", locationLabel:"📍 Lieu (Ville/Pays)", keywordLabel:"🔍 Mot-clé métier", searchBtn:"Trouver des leads et afficher sur la carte", loadingMsg:"Récupération des données OpenStreetMap...", resultsTitle:"Leads (Email, WhatsApp, Site Web)", adText:"Domaine premium en vente sur", adCta:"— Possédez cette marque!", credit:"Intelligence B2B", noResults:"Aucune entreprise réelle trouvée. Essayez un autre mot-clé.", apiError:"Erreur de requête OSM. Utilisez un mot-clé plus simple." },
-        ja: { tagline:"実店舗データ | メール＆WhatsAppリード", locationLabel:"📍 場所 (都市/国)", keywordLabel:"🔍 ビジネスキーワード", searchBtn:"リードを検索してマップに表示", loadingMsg:"OpenStreetMapから実際のビジネスを取得中...", resultsTitle:"ビジネスリード (メール、WhatsApp、ウェブサイト)", adText:"プレミアムドメイン販売", adCta:"— このブランドを入手！", credit:"B2Bインテリジェンス", noResults:"実際の事業所が見つかりません。別のキーワードを試してください。", apiError:"OSMクエリエラー。より簡単なキーワードを使用してください。" },
-        zh: { tagline:"真实商业数据 | 电子邮件和WhatsApp线索", locationLabel:"📍 位置 (城市/国家)", keywordLabel:"🔍 商业关键词", searchBtn:"搜索线索并在地图上显示", loadingMsg:"从OpenStreetMap获取真实商家...", resultsTitle:"商业线索 (电子邮件、WhatsApp、网站)", adText:"优质域名出售", adCta:"— 拥有这个品牌！", credit:"B2B智能", noResults:"未找到真实商家。请尝试其他关键词。", apiError:"OSM查询错误。请使用更简单的关键词。" }
-    };
-    let currentLang = "en";
-    function updateUI(lang) {
-        const t = translations[lang];
-        if(!t) return;
-        document.querySelectorAll("[data-i18n]").forEach(el => {
-            const key = el.getAttribute("data-i18n");
-            if(t[key]) el.innerHTML = t[key];
-        });
-        document.getElementById("locationInput").placeholder = lang==="ar"?"مثال: دبي، لندن":(lang==="de"?"z.B. Dubai, Berlin":"e.g. Dubai, Paris");
-        document.getElementById("keywordInput").placeholder = lang==="ar"?"مثال: مطعم، عيادة":(lang==="de"?"z.B. Restaurant, Klinik":"e.g. Restaurant, Clinic");
-    }
-    document.querySelectorAll(".lang-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-            document.querySelectorAll(".lang-btn").forEach(b=>b.classList.remove("active"));
-            btn.classList.add("active");
-            currentLang = btn.getAttribute("data-lang");
-            updateUI(currentLang);
-        });
-    });
-    updateUI("en");
-
-    // ---------- MAP INIT ----------
-    let map = L.map('map').setView([25.2048, 55.2708], 13);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '© OSM & CartoDB', subdomains:'abcd', maxZoom:19 }).addTo(map);
-    let markersLayer = L.layerGroup().addTo(map);
-
-    function clearResults() {
-        markersLayer.clearLayers();
-        document.getElementById("resultsGrid").innerHTML = "";
-        document.getElementById("resultCount").innerHTML = "0 businesses";
-    }
-
-    // Geocode using Nominatim
-    async function geocodeLocation(locationName) {
-        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationName)}&limit=1`;
-        const resp = await fetch(url, { headers: { 'User-Agent': 'SiwetMapLeads/1.0' } });
-        const data = await resp.json();
-        if(data && data.length) return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
-        throw new Error("Location not found");
-    }
-
-    // Sanitize keyword for Overpass (remove special chars that break regex)
-    function sanitizeKeyword(kw) {
-        return kw.replace(/[<>\\/&;`'\"$*?]/g, '').trim();
-    }
-
-    // Fetch real businesses from Overpass API with email, phone, website
-    async function fetchRealBusinesses(keyword, bbox) {
-        const safeKeyword = sanitizeKeyword(keyword);
-        if(safeKeyword.length === 0) throw new Error("Invalid keyword");
-        const [south, west, north, east] = bbox;
-        // Query includes tags: email, phone, website, contact:email, etc.
-        const overpassQuery = `[out:json][timeout:45];
-        (
-          node["name"~"${safeKeyword}", i](${south},${west},${north},${east});
-          way["name"~"${safeKeyword}", i](${south},${west},${north},${east});
-          node["shop"~"${safeKeyword}", i](${south},${west},${north},${east});
-          way["shop"~"${safeKeyword}", i](${south},${west},${north},${east});
-          node["amenity"~"${safeKeyword}", i](${south},${west},${north},${east});
-          way["amenity"~"${safeKeyword}", i](${south},${west},${north},${east});
-        );
-        out body center;`;
-        const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`;
-        const response = await fetch(url);
-        const contentType = response.headers.get("content-type") || "";
-        if (!contentType.includes("application/json")) {
-            throw new Error(translations[currentLang]?.apiError || "Query format error");
+        function switchLanguage(lang) {
+            localStorage.setItem('siwet_lang', lang);
+            applyLanguage(lang);
         }
-        const data = await response.json();
-        if(!data.elements) return [];
-        const results = [];
-        for(let el of data.elements) {
-            let lat = el.lat || (el.center?.lat);
-            let lon = el.lon || (el.center?.lon);
-            if(!lat || !lon) continue;
-            const tags = el.tags || {};
-            const name = tags.name || "Unnamed";
-            const address = tags["addr:street"] || tags["addr:full"] || tags["addr:city"] || "Address not specified";
-            const phone = tags.phone || tags["contact:phone"] || null;
-            const website = tags.website || tags.url || null;
-            // Email can be in tags.email or contact:email
-            let email = tags.email || tags["contact:email"] || null;
-            // Filter out invalid emails
-            if(email && !email.includes('@')) email = null;
-            results.push({
-                name: name,
-                location: address,
-                phone: phone,
-                website: website,
-                email: email,
-                lat: lat,
-                lng: lon
+
+        function applyLanguage(lang) {
+            currentLang = lang;
+            // Update HTML dir and lang
+            document.documentElement.lang = lang;
+            if (lang === 'ar') {
+                document.body.classList.add('rtl');
+                document.documentElement.dir = 'rtl';
+            } else {
+                document.body.classList.remove('rtl');
+                document.documentElement.dir = 'ltr';
+            }
+
+            // Update all elements with data-i18n attribute
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang] && translations[lang][key]) {
+                    el.textContent = translations[lang][key];
+                }
             });
-        }
-        // Remove duplicates
-        const unique = [];
-        const seen = new Set();
-        for(let b of results) {
-            const key = b.name + b.location;
-            if(!seen.has(key)) { seen.add(key); unique.push(b); }
-        }
-        return unique.slice(0, 200);
-    }
 
-    function renderBusinesses(businesses, centerCoords) {
-        const grid = document.getElementById("resultsGrid");
-        if(!businesses.length) {
-            grid.innerHTML = `<div class="error-box"><i class="fas fa-store-slash"></i> ${translations[currentLang].noResults}</div>`;
-            document.getElementById("resultCount").innerHTML = `0 ${translations[currentLang]?.resultsTitle || "businesses"}`;
-            return;
+            // Update placeholders
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (translations[lang] && translations[lang][key]) {
+                    el.placeholder = translations[lang][key];
+                }
+            });
+
+            // Re-render results if any exist, to update labels
+            if (window.currentResults) {
+                renderResults(window.currentResults);
+            }
         }
-        document.getElementById("resultCount").innerHTML = `${businesses.length} businesses found with contact info`;
-        grid.innerHTML = businesses.map(b => {
-            const whatsappNumber = b.phone ? b.phone.replace(/[^0-9+]/g, '') : '';
-            return `
+
+        // ---------- Map Initialization ----------
+        const map = L.map('map').setView([25.2048, 55.2708], 6); // Default to Dubai
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 19
+        }).addTo(map);
+
+        let markersLayer = L.layerGroup().addTo(map);
+
+        // ---------- Search Function ----------
+        async function searchLeads() {
+            const location = document.getElementById('location').value.trim();
+            const keyword = document.getElementById('keyword').value.trim();
+            if (!location || !keyword) {
+                alert(currentLang === 'ar' ? 'املأ جميع الحقول' : 'Fill all fields');
+                return;
+            }
+
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('resultsGrid').innerHTML = '';
+            markersLayer.clearLayers();
+
+            try {
+                // Call your Vercel API that uses SerpApi
+                const response = await fetch('/api/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        query: `${keyword} in ${location}`,
+                        location: location,   // optional: you can parse coordinates if needed
+                        lang: currentLang
+                    })
+                });
+
+                if (!response.ok) throw new Error('API error');
+                const data = await response.json();
+                window.currentResults = data; // store for language re-render
+                renderResults(data);
+            } catch (error) {
+                console.error(error);
+                document.getElementById('resultsGrid').innerHTML = `<p>${translations[currentLang].no_results}</p>`;
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function renderResults(businesses) {
+            const grid = document.getElementById('resultsGrid');
+            if (!businesses || businesses.length === 0) {
+                grid.innerHTML = `<p>${translations[currentLang].no_results}</p>`;
+                return;
+            }
+
+            // Clear old markers
+            markersLayer.clearLayers();
+            const bounds = [];
+
+            grid.innerHTML = businesses.map((b, index) => {
+                // Extract data (adjust field names based on your SerpApi response)
+                const name = b.title || b.name || 'N/A';
+                const address = b.address || b.location || '';
+                const phone = b.phone || '';
+                const website = b.website || b.link || '';
+                const email = b.email || '';
+                const lat = b.gps_coordinates?.latitude || b.latitude;
+                const lng = b.gps_coordinates?.longitude || b.longitude;
+                const phoneClean = phone ? phone.replace(/[^0-9+]/g, '') : '';
+
+                // Add marker to map if coordinates exist
+                if (lat && lng) {
+                    const marker = L.marker([lat, lng]).addTo(markersLayer);
+                    marker.bindPopup(`<b>${name}</b><br>${address}`);
+                    bounds.push([lat, lng]);
+                }
+
+                // Build card with current language labels
+                const t = translations[currentLang];
+                return `
                 <div class="card">
-                    <h3><i class="fas fa-building"></i> ${escapeHtml(b.name)}</h3>
-                    <p><i class="fas fa-map-pin"></i> ${escapeHtml(b.location)}</p>
+                    <h3>${name}</h3>
+                    ${address ? `<p>${t.location_label} ${address}</p>` : ''}
                     <div class="actions">
-                        ${b.phone ? `<a href="https://wa.me/${whatsappNumber}" target="_blank" class="btn-icon btn-wa"><i class="fab fa-whatsapp"></i> WhatsApp</a>` : ''}
-                        ${b.website ? `<a href="${b.website.startsWith('http')?b.website:'https://'+b.website}" target="_blank" class="btn-icon btn-web"><i class="fas fa-globe"></i> Website</a>` : ''}
-                        ${b.email ? `<a href="mailto:${b.email}" class="btn-icon btn-email"><i class="fas fa-envelope"></i> Email</a>` : ''}
+                        ${phone ? `<a href="https://wa.me/${phoneClean}" target="_blank" class="btn-wa">💬 ${t.whatsapp}</a>` : ''}
+                        ${website ? `<a href="${website}" target="_blank" class="btn-web">🌐 ${t.website}</a>` : ''}
+                        ${email ? `<a href="mailto:${email}" class="btn-email">✉️ ${t.email}</a>` : ''}
                     </div>
-                    ${b.phone ? `<p style="margin-top:10px; font-size:0.75rem;"><i class="fas fa-phone-alt"></i> ${escapeHtml(b.phone)}</p>` : ''}
-                </div>
-            `;
-        }).join('');
-        // Add markers to map
-        const bounds = [];
-        businesses.forEach(b => {
-            if(b.lat && b.lng) {
-                const marker = L.marker([b.lat, b.lng]).addTo(markersLayer);
-                let popupContent = `<b>${escapeHtml(b.name)}</b><br>📍 ${escapeHtml(b.location)}`;
-                if(b.phone) popupContent += `<br>📞 ${b.phone}`;
-                if(b.email) popupContent += `<br>✉️ ${b.email}`;
-                marker.bindPopup(popupContent);
-                bounds.push([b.lat, b.lng]);
+                </div>`;
+            }).join('');
+
+            // Adjust map view to fit all markers
+            if (bounds.length > 0) {
+                map.fitBounds(bounds, { padding: [30, 30] });
             }
-        });
-        if(bounds.length) map.fitBounds(bounds, { padding: [40,40] });
-        else if(centerCoords) map.setView([centerCoords.lat, centerCoords.lon], 13);
-    }
-
-    function escapeHtml(str) { return String(str).replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
-
-    // Main search
-    async function performSearch() {
-        const locationRaw = document.getElementById("locationInput").value.trim();
-        const keyword = document.getElementById("keywordInput").value.trim();
-        if(!locationRaw || !keyword) {
-            alert("Please fill both location and keyword.");
-            return;
         }
-        const loadingDiv = document.getElementById("loading");
-        const searchBtn = document.getElementById("searchBtn");
-        loadingDiv.style.display = "block";
-        searchBtn.disabled = true;
-        clearResults();
-        try {
-            const coords = await geocodeLocation(locationRaw);
-            const delta = 0.2; // ~20km
-            const bbox = [coords.lat - delta, coords.lon - delta, coords.lat + delta, coords.lon + delta];
-            const businesses = await fetchRealBusinesses(keyword, bbox);
-            renderBusinesses(businesses, coords);
-        } catch(err) {
-            console.error(err);
-            let errorMsg = err.message;
-            if(errorMsg.includes("OSM query") || errorMsg.includes("format")) {
-                errorMsg = translations[currentLang]?.apiError || "Query error. Try a simpler keyword (e.g., 'cafe', 'hotel').";
-            } else if(errorMsg.includes("Location not found")) {
-                errorMsg = "Location not found. Please check the city or country name.";
-            }
-            document.getElementById("resultsGrid").innerHTML = `<div class="error-box"><i class="fas fa-exclamation-triangle"></i> ${escapeHtml(errorMsg)}</div>`;
-            document.getElementById("resultCount").innerHTML = `0 results`;
-        } finally {
-            loadingDiv.style.display = "none";
-            searchBtn.disabled = false;
-        }
-    }
-
-    document.getElementById("searchBtn").addEventListener("click", performSearch);
-    window.addEventListener("load", () => setTimeout(performSearch, 400));
-</script>
+    </script>
 </body>
 </html>
