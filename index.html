@@ -1,88 +1,205 @@
-اصلح هاذا كود
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr" id="htmlRoot">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MapLeads Pro | Business Finder</title>
-    <style>
-        :root { --accent: #00e5ff; --bg: #070b14; --card: #111827; --text: #fff; }
-        body { font-family: sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
-        .search-box { max-width: 800px; margin: 40px auto; background: var(--card); padding: 30px; border-radius: 20px; border: 1px solid #233044; }
-        .search-row { display: flex; gap: 10px; margin-bottom: 15px; }
-        input { flex: 1; padding: 15px; border-radius: 10px; border: none; background: #1f2937; color: white; }
-        button { padding: 15px 30px; background: var(--accent); border: none; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 30px; }
-        .card { background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid #233044; }
-        .actions { margin-top: 15px; display: flex; gap: 10px; }
-        .btn-wa { background: #25D366; color: white; padding: 8px 12px; border-radius: 5px; text-decoration: none; font-size: 0.9rem; }
-        .btn-web { background: #7c3aed; color: white; padding: 8px 12px; border-radius: 5px; text-decoration: none; font-size: 0.9rem; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Siwet MapLeads | Find Business Leads on the Map</title>
+<meta name="description" content="Siwet MapLeads helps you find business leads, phone numbers, WhatsApp contacts, emails and websites by location and keyword on an interactive map.">
+<meta name="keywords" content="business leads finder, map leads, find businesses near me, whatsapp leads, b2b leads generator, local business search, lead generation tool, siwet mapleads, أداة جلب العملاء, خرائط الأعمال, البحث عن عملاء محتملين, أرقام واتساب للشركات, جلب بيانات الشركات من الخرائط">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+:root{
+  --accent:#00e5ff;
+  --accent2:#7c3aed;
+  --bg:#070b14;
+  --card:#0f1726;
+  --border:#1f2c42;
+  --text:#eef3fb;
+  --muted:#8aa0c2;
+}
+*{box-sizing:border-box;}
+body{margin:0;font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);}
+[dir="rtl"] body{font-family:'Tajawal',sans-serif;}
+
+/* glow background */
+body::before{
+  content:"";position:fixed;inset:0;z-index:-1;
+  background:radial-gradient(circle at 20% 10%, rgba(0,229,255,.15), transparent 40%),
+             radial-gradient(circle at 85% 80%, rgba(124,58,237,.18), transparent 45%);
+}
+
+header{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;border-bottom:1px solid var(--border);}
+.logo{font-weight:800;font-size:1.4rem;letter-spacing:.5px;}
+.logo span{color:var(--accent);}
+select#langSwitch{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:inherit;}
+
+.hero{text-align:center;padding:50px 20px 20px;}
+.hero h1{font-size:2.4rem;margin:0 0 10px;font-weight:800;}
+.hero p{color:var(--muted);max-width:600px;margin:0 auto;}
+
+.search-box{max-width:900px;margin:30px auto;background:var(--card);padding:24px;border-radius:18px;border:1px solid var(--border);box-shadow:0 10px 40px rgba(0,229,255,.05);}
+.search-row{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+.search-row input{flex:1;min-width:180px;padding:14px;border-radius:10px;border:1px solid var(--border);background:#16213a;color:var(--text);font-size:1rem;}
+button.primary{padding:14px 30px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:10px;font-weight:700;cursor:pointer;width:100%;color:#04141a;font-size:1rem;transition:transform .15s;}
+button.primary:hover{transform:translateY(-2px);}
+
+#map{height:380px;border-radius:16px;margin:0 auto 30px;max-width:900px;border:1px solid var(--border);}
+
+#loading{text-align:center;color:var(--accent);display:none;margin-bottom:20px;}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;max-width:1100px;margin:0 auto 50px;padding:0 20px;}
+.card{background:var(--card);padding:18px;border-radius:14px;border:1px solid var(--border);}
+.card h3{margin:0 0 6px;font-size:1.05rem;}
+.card p{margin:4px 0;color:var(--muted);font-size:.9rem;}
+.actions{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;}
+.actions a{padding:8px 12px;border-radius:6px;text-decoration:none;font-size:.85rem;font-weight:600;}
+.btn-wa{background:#25D366;color:#04130a;}
+.btn-web{background:var(--accent2);color:#fff;}
+.btn-mail{background:#334155;color:#fff;}
+
+/* domain sale banner */
+.sale-banner{max-width:900px;margin:0 auto 30px;background:linear-gradient(135deg,rgba(124,58,237,.18),rgba(0,229,255,.12));border:1px dashed var(--accent);border-radius:14px;padding:14px 20px;text-align:center;font-size:.95rem;}
+.sale-banner a{color:var(--accent);font-weight:700;text-decoration:none;}
+
+footer{text-align:center;color:var(--muted);font-size:.8rem;padding:30px 20px;border-top:1px solid var(--border);}
+footer .credit{margin-top:6px;opacity:.6;}
+</style>
 </head>
 <body>
-    <div class="search-box">
-        <div class="search-row">
-            <input type="text" id="location" placeholder="City or Country (e.g., Dubai)">
-            <input type="text" id="keyword" placeholder="Keyword (e.g., Restaurants)">
-        </div>
-        <button onclick="searchLeads()">Search Leads (Gathering up to 200)</button>
+
+<header>
+  <div class="logo">Siwet <span>MapLeads</span></div>
+  <select id="langSwitch">
+    <option value="en">English</option>
+    <option value="ar">العربية</option>
+    <option value="de">Deutsch</option>
+    <option value="fr">Français</option>
+    <option value="ja">日本語</option>
+    <option value="zh">中文</option>
+  </select>
+</header>
+
+<section class="hero">
+  <h1 data-i18n="heroTitle">Find local business leads on the map</h1>
+  <p data-i18n="heroSub">Search any city, see businesses on an interactive map, and grab their phone, WhatsApp, email and website instantly.</p>
+</section>
+
+<div class="sale-banner">
+  🌐 <span data-i18n="domainFor">Domain for sale:</span> <strong>Siwet.com</strong> —
+  <a href="https://www.godaddy.com/" target="_blank" rel="noopener" data-i18n="viewOnGoDaddy">View on GoDaddy</a>
+  · <a href="mailto:contact@siwet.com" data-i18n="contactOwner">Contact owner</a>
+</div>
+
+<div class="search-box">
+  <div class="search-row">
+    <input type="text" id="location" data-i18n-ph="locationPh" placeholder="City or Country (e.g., Dubai)">
+    <input type="text" id="keyword" data-i18n-ph="keywordPh" placeholder="Keyword (e.g., Restaurants)">
+  </div>
+  <button class="primary" onclick="searchLeads()" data-i18n="searchBtn">Search Leads</button>
+</div>
+
+<div id="map"></div>
+<div id="loading" data-i18n="loading">Searching... please wait.</div>
+<div class="grid" id="resultsGrid"></div>
+
+<footer>
+  <div data-i18n="footerTxt">Siwet MapLeads — discover business leads worldwide.</div>
+  <div class="credit">Made with Claude ✦</div>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ---------- i18n ----------
+const dict = {
+  en:{heroTitle:"Find local business leads on the map",heroSub:"Search any city, see businesses on an interactive map, and grab their phone, WhatsApp, email and website instantly.",locationPh:"City or Country (e.g., Dubai)",keywordPh:"Keyword (e.g., Restaurants)",searchBtn:"Search Leads",loading:"Searching... please wait.",footerTxt:"Siwet MapLeads — discover business leads worldwide.",domainFor:"Domain for sale:",viewOnGoDaddy:"View on GoDaddy",contactOwner:"Contact owner",fillAll:"Please fill in both fields"},
+  ar:{heroTitle:"اكتشف عملاء محتملين للشركات على الخريطة",heroSub:"ابحث عن أي مدينة، شاهد الشركات على خريطة تفاعلية، واحصل على الهاتف والواتساب والبريد والموقع فوراً.",locationPh:"المدينة أو الدولة (مثال: دبي)",keywordPh:"كلمة مفتاحية (مثال: مطاعم)",searchBtn:"بحث عن العملاء",loading:"جاري البحث... يرجى الانتظار.",footerTxt:"Siwet MapLeads — اكتشف عملاء محتملين حول العالم.",domainFor:"الدومين للبيع:",viewOnGoDaddy:"عرض في GoDaddy",contactOwner:"تواصل مع المالك",fillAll:"يرجى تعبئة الحقلين"},
+  de:{heroTitle:"Finden Sie lokale Geschäftskontakte auf der Karte",heroSub:"Suchen Sie eine Stadt, sehen Sie Unternehmen auf einer interaktiven Karte und erhalten Sie sofort Telefon, WhatsApp, E-Mail und Website.",locationPh:"Stadt oder Land (z.B. Dubai)",keywordPh:"Stichwort (z.B. Restaurants)",searchBtn:"Leads suchen",loading:"Suche läuft... bitte warten.",footerTxt:"Siwet MapLeads — entdecken Sie Geschäftskontakte weltweit.",domainFor:"Domain zu verkaufen:",viewOnGoDaddy:"Auf GoDaddy ansehen",contactOwner:"Eigentümer kontaktieren",fillAll:"Bitte beide Felder ausfüllen"},
+  fr:{heroTitle:"Trouvez des prospects locaux sur la carte",heroSub:"Recherchez une ville, visualisez les entreprises sur une carte interactive et obtenez instantanément téléphone, WhatsApp, email et site web.",locationPh:"Ville ou pays (ex. Dubaï)",keywordPh:"Mot-clé (ex. Restaurants)",searchBtn:"Rechercher des prospects",loading:"Recherche en cours... veuillez patienter.",footerTxt:"Siwet MapLeads — découvrez des prospects dans le monde entier.",domainFor:"Domaine à vendre :",viewOnGoDaddy:"Voir sur GoDaddy",contactOwner:"Contacter le propriétaire",fillAll:"Veuillez remplir les deux champs"},
+  ja:{heroTitle:"地図上でローカルビジネスのリードを見つける",heroSub:"都市を検索し、インタラクティブな地図上でビジネスを表示し、電話、WhatsApp、メール、ウェブサイトを即座に取得できます。",locationPh:"都市または国（例：ドバイ）",keywordPh:"キーワード（例：レストラン）",searchBtn:"リードを検索",loading:"検索中です。お待ちください。",footerTxt:"Siwet MapLeads — 世界中のビジネスリードを発見しましょう。",domainFor:"販売中のドメイン：",viewOnGoDaddy:"GoDaddyで見る",contactOwner:"所有者に連絡",fillAll:"両方のフィールドを入力してください"},
+  zh:{heroTitle:"在地图上查找本地商家潜在客户",heroSub:"搜索任意城市，在交互式地图上查看商家，并立即获取电话、WhatsApp、电子邮件和网站。",locationPh:"城市或国家（例如：迪拜）",keywordPh:"关键词（例如：餐厅）",searchBtn:"搜索潜在客户",loading:"正在搜索，请稍候。",footerTxt:"Siwet MapLeads — 发现全球商业线索。",domainFor:"域名出售：",viewOnGoDaddy:"在 GoDaddy 查看",contactOwner:"联系所有者",fillAll:"请填写两个字段"}
+};
+
+function applyLang(lang){
+  const d = dict[lang] || dict.en;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k = el.getAttribute('data-i18n');
+    if(d[k]) el.textContent = d[k];
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
+    const k = el.getAttribute('data-i18n-ph');
+    if(d[k]) el.placeholder = d[k];
+  });
+  document.getElementById('htmlRoot').setAttribute('lang', lang);
+  document.getElementById('htmlRoot').setAttribute('dir', lang==='ar'?'rtl':'ltr');
+  localStorage.setItem('siwet_lang', lang);
+}
+document.getElementById('langSwitch').addEventListener('change', e=>applyLang(e.target.value));
+const savedLang = localStorage.getItem('siwet_lang') || 'en';
+document.getElementById('langSwitch').value = savedLang;
+applyLang(savedLang);
+
+// ---------- map ----------
+const map = L.map('map').setView([25.2048, 55.2708], 4);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+  attribution:'&copy; OpenStreetMap contributors'
+}).addTo(map);
+let markers = [];
+
+// ---------- search ----------
+async function searchLeads(){
+  const loc = document.getElementById('location').value.trim();
+  const key = document.getElementById('keyword').value.trim();
+  const lang = document.getElementById('langSwitch').value;
+  if(!loc || !key){ alert(dict[lang].fillAll); return; }
+
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('resultsGrid').innerHTML = '';
+
+  try{
+    const response = await fetch('/api/search', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ q: `${key} in ${loc}` })
+    });
+    const data = await response.json();
+    render(data);
+  }catch(err){
+    console.error(err);
+  }finally{
+    document.getElementById('loading').style.display = 'none';
+  }
+}
+
+function render(data){
+  // clear old markers
+  markers.forEach(m=>map.removeLayer(m));
+  markers = [];
+
+  const grid = document.getElementById('resultsGrid');
+  grid.innerHTML = (data || []).map(b => `
+    <div class="card">
+      <h3>${b.name || ''}</h3>
+      <p>📍 ${b.location || 'N/A'}</p>
+      <div class="actions">
+        ${b.phone ? `<a href="https://wa.me/${b.phone.replace(/[^0-9]/g,'')}" target="_blank" class="btn-wa">WhatsApp</a>` : ''}
+        ${b.website ? `<a href="${b.website}" target="_blank" class="btn-web">Website</a>` : ''}
+        ${b.email ? `<a href="mailto:${b.email}" class="btn-mail">Email</a>` : ''}
+      </div>
     </div>
-    <div id="loading" style="text-align:center; display:none;">Searching... please wait.</div>
-    <div class="grid" id="resultsGrid"></div>
+  `).join('');
 
-    <script>
-        async function searchLeads() {
-            const loc = document.getElementById('location').value;
-            const key = document.getElementById('keyword').value;
-            if(!loc || !key) return alert("Fill all fields");
-            
-            document.getElementById('loading').style.display = 'block';
-            const response = await fetch('/api/search', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ q: `${key} in ${loc}` })
-            });
-            const data = await response.json();
-            render(data);
-            document.getElementById('loading').style.display = 'none';
-        }
-
-        function render(data) {
-            const grid = document.getElementById('resultsGrid');
-            grid.innerHTML = data.map(b => `
-                <div class="card">
-                    <h3>${b.name}</h3>
-                    <p>📍 ${b.location || 'N/A'}</p>
-                    <div class="actions">
-                        ${b.phone ? `<a href="https://wa.me/${b.phone.replace(/[^0-9]/g,'')}" target="_blank" class="btn-wa">WhatsApp</a>` : ''}
-                        ${b.website ? `<a href="${b.website}" target="_blank" class="btn-web">Website</a>` : ''}
-                    </div>
-                </div>
-            `).join('');
-        }
-    </script>
+  let bounds = [];
+  (data || []).forEach(b=>{
+    if(b.lat && b.lng){
+      const m = L.marker([b.lat, b.lng]).addTo(map).bindPopup(`<strong>${b.name}</strong><br>${b.location||''}`);
+      markers.push(m);
+      bounds.push([b.lat, b.lng]);
+    }
+  });
+  if(bounds.length) map.fitBounds(bounds, {maxZoom:12});
+}
+</script>
 </body>
 </html>
-
-
-
-
-اريد تضهر خارطة في موقع 
-مع خانة اختيار مكان 
-وخانة ثانية البحث 
-مع اسم موقع Siwet 
-Siwet MapLeads
-واريد كلمات SEO 
-كلمات مفتاحية في للغة الانجليزية والعربية والموقع في الغة الانجليزية ويوجد تغيير اللغة إلى ألمانية و فرنسية و يابان و صين و عربية 
-
-مع مضهر الموقع يكون حترافية ونبض للموقع 
-مع علان بيع دومين Siwet.com في GoDaddy 
-علان صغير 
-وتستطيع وضع بصمتك اذا لديك فكرة
-serpAPI API 
-API في Vercel 
-نتائج البحث 
-ايميل عميل 
-رقم واتس اب وعند ضغط على رقم ينتقل مباشر إلى واتس اب 
-موقع شركة 
-
